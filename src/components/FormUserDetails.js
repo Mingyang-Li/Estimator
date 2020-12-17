@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
+import { Typography } from "@material-ui/core";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import theme from "../theme";
 
 export class FormUserDetails extends Component {
   continue = (e) => {
@@ -14,10 +16,11 @@ export class FormUserDetails extends Component {
   render() {
     const { values, handleChange } = this.props;
     return (
-      <MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
         <>
           <Dialog open fullWidth maxWidth="sm">
             <AppBar title="Enter User Details" />
+            <Typography variant="h5">FormUserDetails</Typography>
             <TextField
               placeholder="Enter Your First Name"
               label="First Name"
@@ -46,7 +49,9 @@ export class FormUserDetails extends Component {
             />
             <br />
             <Button color="primary" variant="contained" onClick={this.continue}>
-              Continue
+              <Typography color="textColor" variant="h8">
+                Continue
+              </Typography>
             </Button>
           </Dialog>
         </>

@@ -1,17 +1,20 @@
-import React, { Component } from 'react';
-import Dialog from '@material-ui/core/Dialog';
-import AppBar from '@material-ui/core/AppBar';
-import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+import React, { Component } from "react";
+import Dialog from "@material-ui/core/Dialog";
+import AppBar from "@material-ui/core/AppBar";
+import { Typography } from "@material-ui/core";
+import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import theme from "../theme";
+import FormUserDetails from "./FormUserDetails";
 
 export class FormPersonalDetails extends Component {
-  continue = e => {
+  continue = (e) => {
     e.preventDefault();
     this.props.nextStep();
   };
 
-  back = e => {
+  back = (e) => {
     e.preventDefault();
     this.props.prevStep();
   };
@@ -19,18 +22,15 @@ export class FormPersonalDetails extends Component {
   render() {
     const { values, handleChange } = this.props;
     return (
-      <MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
         <>
-          <Dialog
-            open
-            fullWidth
-            maxWidth='sm'
-          >
+          <Dialog open fullWidth maxWidth="sm">
             <AppBar title="Enter Personal Details" />
+            <Typography variant="h5">FormPersonalDetails</Typography>
             <TextField
               placeholder="Enter Your Occupation"
               label="Occupation"
-              onChange={handleChange('occupation')}
+              onChange={handleChange("occupation")}
               defaultValue={values.occupation}
               margin="normal"
               fullWidth
@@ -39,7 +39,7 @@ export class FormPersonalDetails extends Component {
             <TextField
               placeholder="Enter Your City"
               label="City"
-              onChange={handleChange('city')}
+              onChange={handleChange("city")}
               defaultValue={values.city}
               margin="normal"
               fullWidth
@@ -48,24 +48,20 @@ export class FormPersonalDetails extends Component {
             <TextField
               placeholder="Enter Your Bio"
               label="Bio"
-              onChange={handleChange('bio')}
+              onChange={handleChange("bio")}
               defaultValue={values.bio}
               margin="normal"
               fullWidth
             />
             <br />
 
-            <Button
-              color="secondary"
-              variant="contained"
-              onClick={this.back}
-            >Back</Button>
+            <Button color="secondary" variant="contained" onClick={this.back}>
+              Back
+            </Button>
 
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={this.continue}
-            >Continue</Button>
+            <Button color="primary" variant="contained" onClick={this.continue}>
+              Continue
+            </Button>
           </Dialog>
         </>
       </MuiThemeProvider>

@@ -4,6 +4,7 @@ import AppBar from "@material-ui/core/AppBar";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import { List, ListItem, ListItemText } from "@material-ui/core/";
 import Button from "@material-ui/core/Button";
+import theme from "../theme";
 
 export class Confirm extends Component {
   continue = (e) => {
@@ -32,7 +33,7 @@ export class Confirm extends Component {
       },
     } = this.props;
     return (
-      <MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
         <>
           <Dialog open fullWidth maxWidth="sm">
             <AppBar title="Confirm User Data" />

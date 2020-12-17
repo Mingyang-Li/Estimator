@@ -1,17 +1,11 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import FormUserDetails from "./FormUserDetails";
+import FormPersonalDetails from "./FormPersonalDetails";
 import FormClientRequirements from "./FormClientRequirements";
 import FormMCQ from "./FormMCQ";
 import Confirm from "./Confirm";
 import Success from "./Success";
-
-const useStyles = withStyles({
-  root: {
-    backgroundColor: "#4caf50",
-    borderRadius: 3,
-  },
-});
 
 export class UserForm extends Component {
   state = {
@@ -91,7 +85,7 @@ export class UserForm extends Component {
         );
       case 2:
         return (
-          <FormClientRequirements
+          <FormPersonalDetails
             nextStep={this.nextStep}
             prevStep={this.prevStep}
             handleChange={this.handleChange}
