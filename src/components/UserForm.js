@@ -3,9 +3,11 @@ import { withStyles } from "@material-ui/core/styles";
 import FormUserDetails from "./FormUserDetails";
 import FormPersonalDetails from "./FormPersonalDetails";
 import FormClientRequirements from "./FormClientRequirements";
-import FormMCQ from "./FormMCQ";
+import MCQScale from "./MCQScale";
 import Confirm from "./Confirm";
 import Success from "./Success";
+import OwnAppBar from "./OwnAppBar";
+import MenuItems from "./MenuItems";
 
 export class UserForm extends Component {
   state = {
@@ -55,11 +57,12 @@ export class UserForm extends Component {
       lastName,
       email,
       occupation,
+      industry,
       city,
-      bio,
       scale,
       usage,
       ui,
+      totalPrice,
     } = this.state;
 
     const values = {
@@ -67,17 +70,18 @@ export class UserForm extends Component {
       lastName,
       email,
       occupation,
+      industry,
       city,
-      bio,
       scale,
       usage,
       ui,
+      totalPrice,
     };
 
     switch (step) {
       case 1:
         return (
-          <FormUserDetails
+          <MCQScale
             nextStep={this.nextStep}
             handleChange={this.handleChange}
             values={values}
@@ -103,7 +107,7 @@ export class UserForm extends Component {
         );
       case 4:
         return (
-          <FormMCQ
+          <MCQScale
             nextStep={this.nextStep}
             prevStep={this.prevStep}
             handleChange={this.handleChange}

@@ -6,7 +6,6 @@ import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
-import FormUserDetails from "./FormUserDetails";
 
 export class FormPersonalDetails extends Component {
   continue = (e) => {
@@ -37,19 +36,20 @@ export class FormPersonalDetails extends Component {
             />
             <br />
             <TextField
-              placeholder="Enter Your City"
-              label="City"
-              onChange={handleChange("city")}
-              defaultValue={values.city}
+              placeholder="What industry are you in"
+              label="Industry"
+              onChange={handleChange("industry")}
+              defaultValue={values.industry}
               margin="normal"
               fullWidth
             />
             <br />
+
             <TextField
-              placeholder="Enter Your Bio"
-              label="Bio"
-              onChange={handleChange("bio")}
-              defaultValue={values.bio}
+              placeholder="Enter Your City"
+              label="City"
+              onChange={handleChange("city")}
+              defaultValue={values.city}
               margin="normal"
               fullWidth
             />
