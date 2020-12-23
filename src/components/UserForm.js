@@ -1,26 +1,13 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import FormUserDetails from "./FormUserDetails";
-import FormPersonalDetails from "./FormPersonalDetails";
-import FormClientRequirements from "./FormClientRequirements";
-import MCQScale from "./MCQScale";
+import MCQ from "./MCQ";
 import Confirm from "./Confirm";
 import Success from "./Success";
-import OwnAppBar from "./OwnAppBar";
-import MenuItems from "./MenuItems";
 
 export class UserForm extends Component {
   state = {
     step: 1,
-    firstName: "",
-    lastName: "",
-    email: "",
-    occupation: "",
-    city: "",
-    bio: "",
-    scale: "",
-    usage: "",
-    ui: "",
+    currentPrice: 0,
     totalPrice: 0,
   };
 
@@ -40,53 +27,18 @@ export class UserForm extends Component {
     });
   };
 
-  // Handle fields change
-  handleChange = (input) => (e) => {
-    this.setState({ [input]: e.target.value });
-  };
-
   render() {
-    const { step } = this.state;
-
-    // semi-original state, can ignore this
-    const {
-      firstName,
-      lastName,
-      email,
-      occupation,
-      industry,
-      city,
-      scale,
-      purpose,
-      management,
-      appearance,
-      users,
-      contentGeneration,
-      paymentIntegration,
-      totalPrice,
-    } = this.state;
-
+    const { step, currentPrice, totalPrice } = this.state;
     const values = {
-      firstName,
-      lastName,
-      email,
-      occupation,
-      industry,
-      city,
-      scale,
-      purpose,
-      management,
-      appearance,
-      users,
-      contentGeneration,
-      paymentIntegration,
+      step,
+      currentPrice,
       totalPrice,
     };
 
     switch (step) {
       case 1:
         return (
-          <MCQScale
+          <MCQ
             nextStep={this.nextStep}
             handleChange={this.handleChange}
             values={values}
@@ -94,40 +46,13 @@ export class UserForm extends Component {
         );
       case 2:
         return (
-          <FormPersonalDetails
-            nextStep={this.nextStep}
-            prevStep={this.prevStep}
-            handleChange={this.handleChange}
-            values={values}
-          />
-        );
-      case 3:
-        return (
-          <FormClientRequirements
-            nextStep={this.nextStep}
-            prevStep={this.prevStep}
-            handleChange={this.handleChange}
-            values={values}
-          />
-        );
-      case 4:
-        return (
-          <MCQScale
-            nextStep={this.nextStep}
-            prevStep={this.prevStep}
-            handleChange={this.handleChange}
-            values={values}
-          />
-        );
-      case 5:
-        return (
           <Confirm
             nextStep={this.nextStep}
             prevStep={this.prevStep}
             values={values}
           />
         );
-      case 6:
+      case 3:
         return <Success />;
       default:
         console.log("This is a multi-step form built with React.");

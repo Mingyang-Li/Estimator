@@ -1,5 +1,5 @@
-import React from 'react';
-import { UserForm } from './components/UserForm';
+import React from "react";
+import { UserForm } from "./components/UserForm";
 
 const App = () => {
   return (
@@ -7,6 +7,6 @@ const App = () => {
       <UserForm />
     </div>
   );
-}
+};
 
 export default App;
