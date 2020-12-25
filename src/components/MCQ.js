@@ -9,12 +9,17 @@ import OwnAppBar from "./OwnAppBar";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
+import quizData from "./quizData";
 
 export default function MCQ(props) {
   const [value, setValue] = React.useState();
   const changedOption = (event) => {
     setValue(event.target.value);
   };
+
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   const currQuestion = {
     questionTopic: "Scale",
@@ -35,9 +40,21 @@ export default function MCQ(props) {
       control={<Radio />}
       label={answerText}
       price={price}
+      onClick={() => setTotalPrice(price)}
     />
   ));
 
+  const calculatePrice = (price) => {
+    setTotalPrice(price);
+  };
+
+  const prevQuestion = () => {
+    setQuestionIndex(questionIndex - 1);
+  };
+
+  const nextQuestion = () => {
+    setQuestionIndex(questionIndex + 1);
+  };
   return (
     <MuiThemeProvider theme={theme}>
       <>
@@ -56,12 +73,14 @@ export default function MCQ(props) {
             </RadioGroup>
           </FormControl>
 
-          <Button color="secondary" variant="contained">
+          <Button color="secondary" variant="contained" onClick={prevQuestion}>
             Back
           </Button>
-          <Button color="primary" variant="contained">
+          <Button color="primary" variant="contained" onClick={nextQuestion}>
             Continue
           </Button>
+          <p>questionIndex: {questionIndex}</p>
+          <p>totalPrice: ${totalPrice}</p>
         </Dialog>
       </>
     </MuiThemeProvider>
