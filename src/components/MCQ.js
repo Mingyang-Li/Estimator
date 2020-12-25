@@ -9,7 +9,7 @@ import OwnAppBar from "./OwnAppBar";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
-import quizData from "./quizData";
+import { quizData } from "./quizData";
 
 export default function MCQ(props) {
   const [value, setValue] = React.useState();
@@ -18,21 +18,10 @@ export default function MCQ(props) {
   };
 
   const [totalPrice, setTotalPrice] = useState(0);
-  const [currentPrice, setCurrentPrice] = useState(0);
+  const [currentOptionPrice, setcurrentOptionPrice] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
 
-  const currQuestion = {
-    questionTopic: "Scale",
-    questionText: "How many users will use your application?",
-    answerOptions: [
-      { answerText: "1-5 users", price: 9000 },
-      { answerText: "6-20 users", price: 15000 },
-      { answerText: "21-40 users", price: 35000 },
-      { answerText: "Custom", price: 0 },
-    ],
-    isCompulstory: true,
-    selectionType: "single-select",
-  };
+  const currQuestion = quizData[questionIndex];
 
   const options = currQuestion.answerOptions.map(({ answerText, price }) => (
     <FormControlLabel
@@ -40,7 +29,7 @@ export default function MCQ(props) {
       control={<Radio />}
       label={answerText}
       price={price}
-      onClick={() => setTotalPrice(price)}
+      onClick={() => setcurrentOptionPrice(price)}
     />
   ));
 
@@ -49,11 +38,15 @@ export default function MCQ(props) {
   };
 
   const prevQuestion = () => {
-    setQuestionIndex(questionIndex - 1);
+    if (questionIndex > 0) {
+      setQuestionIndex(questionIndex - 1);
+    }
   };
 
   const nextQuestion = () => {
-    setQuestionIndex(questionIndex + 1);
+    if (questionIndex < quizData.length - 1) {
+      setQuestionIndex(questionIndex + 1);
+    }
   };
   return (
     <MuiThemeProvider theme={theme}>
@@ -61,14 +54,12 @@ export default function MCQ(props) {
         <OwnAppBar title />
         <Dialog open fullWidth maxWidth="md">
           <FormControl component="fieldset">
-            <h2 component="legend">{currQuestion.questionTopic}</h2>
+            <h2 component="legend">
+              {questionIndex + 1 + ". "}
+              {currQuestion.questionTopic}
+            </h2>
             <h3 component="legend">{currQuestion.questionText}</h3>
-            <RadioGroup
-              aria-label="scale"
-              name="scale"
-              value={value}
-              onChange={changedOption}
-            >
+            <RadioGroup value={value} onChange={changedOption}>
               {options}
             </RadioGroup>
           </FormControl>
@@ -80,6 +71,7 @@ export default function MCQ(props) {
             Continue
           </Button>
           <p>questionIndex: {questionIndex}</p>
+          <p>currentOptionPrice: ${currentOptionPrice}</p>
           <p>totalPrice: ${totalPrice}</p>
         </Dialog>
       </>

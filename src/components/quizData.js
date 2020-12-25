@@ -1,4 +1,4 @@
-export const Questions = [
+export const quizData = [
   {
     questionTopic: "Scale",
     questionText: "How many users will use your application?",
@@ -30,7 +30,7 @@ export const Questions = [
   {
     questionTopic: "Management",
     questionText:
-      "Would you like to have admin access to this application? (CMS)",
+      "Would you like to be able edit content of your application by yourself? (CMS)",
     answerOptions: [
       { answerText: "Yes", price: 5000 },
       { answerText: "No", price: 0 },
