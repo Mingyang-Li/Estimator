@@ -18,6 +18,7 @@ export default function MCQ(props) {
   };
 
   const [totalPrice, setTotalPrice] = useState(0);
+  const [currentOption, setCurrentOption] = useState("");
   const [currentOptionPrice, setcurrentOptionPrice] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
 
@@ -33,8 +34,9 @@ export default function MCQ(props) {
     />
   ));
 
-  const calculatePrice = (price) => {
-    setTotalPrice(price);
+  const updateOptions = (currentOption, currentOptionPrice) => {
+    setCurrentOption(currentOption);
+    setcurrentOptionPrice(currentOptionPrice);
   };
 
   const prevQuestion = () => {
@@ -71,6 +73,7 @@ export default function MCQ(props) {
             Continue
           </Button>
           <p>questionIndex: {questionIndex}</p>
+          <p>currentOption: {currentOption}</p>
           <p>currentOptionPrice: ${currentOptionPrice}</p>
           <p>totalPrice: ${totalPrice}</p>
         </Dialog>
