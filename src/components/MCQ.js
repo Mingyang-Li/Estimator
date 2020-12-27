@@ -37,6 +37,9 @@ export default function MCQ(props) {
     console.log("promptSpecification");
   };
 
+  const clearCurrentChoices = 0;
+  const clearAllChoices = 0;
+
   //whenever an option is selected, I want to update the responses array,
   // so the total costs can be updfated at real time.
   // The idea is to push an object into the array whenever one or multiple options are selected,
