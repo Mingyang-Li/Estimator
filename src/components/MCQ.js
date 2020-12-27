@@ -12,7 +12,9 @@ import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
 import { quizData } from "./quizData";
-import { DevicesOtherSharp } from "@material-ui/icons";
+
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 
 export default function MCQ(props) {
   const [value, setValue] = React.useState();
@@ -26,10 +28,28 @@ export default function MCQ(props) {
   const [questionIndex, setQuestionIndex] = useState(0);
 
   const currQuestion = quizData[questionIndex];
+  const questionNumber = questionIndex + 1;
 
   // An array of objects
-  const [allResponses, setAllResponses] = useState([]);
+  const [responses, updateResponses] = useState([]);
 
+  const promptSpecification = (e) => {
+    console.log("promptSpecification");
+  };
+
+  //whenever an option is selected, I want to update the responses array,
+  // so the total costs can be updfated at real time.
+  // The idea is to push an object into the array whenever one or multiple options are selected,
+  // and then update the responses array if the selected options doesn't exist in it.
+  /*
+
+  responses.push({
+    questionTopic: currQuestion.questionTopic,
+    selectionType: currQuestion.selectionType,
+    chosenOptions: [], // I want this arr to have the questionTopic, chosen option(s) and selection type of the selected options
+  });
+
+  */
   const singleSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
       answerText != "Custom" ? (
@@ -38,7 +58,6 @@ export default function MCQ(props) {
           control={<Radio />}
           label={answerText}
           price={price}
-          onClick={setAllResponses}
         />
       ) : (
         <div className="customOption">
@@ -122,10 +141,30 @@ export default function MCQ(props) {
           <Button color="primary" variant="contained" onClick={nextQuestion}>
             Continue
           </Button>
-          <p>How many questions: {quizData.length}</p>
-          <p>questionIndex: {questionIndex}</p>
-          <p>totalPrice: ${totalPrice}</p>
         </Dialog>
+        <Card open fullWidth maxWidth="sm">
+          <CardContent>
+            <p>
+              <strong>All Responses: </strong>
+              {responses}
+            </p>
+            <p>
+              <strong>Selection Type (current): </strong>
+              {currQuestion.selectionType}
+            </p>
+            <p>
+              <strong>Is it compulstory? </strong>
+              {currQuestion.isCompulstory === true ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>questionIndex: </strong>
+              {questionIndex}
+            </p>
+            <p>
+              <strong>totalPrice: </strong>${totalPrice}
+            </p>
+          </CardContent>
+        </Card>
       </>
     </MuiThemeProvider>
   );
