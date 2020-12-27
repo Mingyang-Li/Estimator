@@ -5,12 +5,14 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import OwnAppBar from "./OwnAppBar";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
 import { quizData } from "./quizData";
+import { DevicesOtherSharp } from "@material-ui/icons";
 
 export default function MCQ(props) {
   const [value, setValue] = React.useState();
@@ -20,40 +22,68 @@ export default function MCQ(props) {
 
   const [questionType, setQuestionType] = useState("single-select");
   const [totalPrice, setTotalPrice] = useState(0);
-  const [currentOption, setCurrentOption] = useState("");
-  const [currentOptionPrice, setcurrentOptionPrice] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(4);
+
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   const currQuestion = quizData[questionIndex];
 
+  // An array of objects
+  const [allResponses, setAllResponses] = useState([]);
+
   const singleSelectQuestions = currQuestion.answerOptions.map(
-    ({ answerText, price }) => (
-      <FormControlLabel
-        value={answerText}
-        control={<Radio />}
-        label={answerText}
-        price={price}
-        onClick={() => setcurrentOptionPrice(price)}
-      />
-    )
+    ({ answerText, price }) =>
+      answerText != "Custom" ? (
+        <FormControlLabel
+          value={answerText}
+          control={<Radio />}
+          label={answerText}
+          price={price}
+          onClick={setAllResponses}
+        />
+      ) : (
+        <div className="customOption">
+          <FormControlLabel
+            value={answerText}
+            control={<Radio />}
+            label={answerText}
+            price={price}
+          />
+          <TextField
+            label="Please Specify"
+            variant="outlined"
+            id="mui-theme-provider-outlined-input"
+            /* error */
+          />
+        </div>
+      )
   );
 
   const multiSelectQuestions = currQuestion.answerOptions.map(
-    ({ answerText, price }) => (
-      <FormControlLabel
-        value={answerText}
-        control={<Checkbox />}
-        label={answerText}
-        price={price}
-        onClick={() => setcurrentOptionPrice(price)}
-      />
-    )
+    ({ answerText, price }) =>
+      answerText != "Custom" ? (
+        <FormControlLabel
+          value={answerText}
+          control={<Checkbox />}
+          label={answerText}
+          price={price}
+        />
+      ) : (
+        <div className="customOption">
+          <FormControlLabel
+            value={answerText}
+            control={<Checkbox />}
+            label={answerText}
+            price={price}
+          />
+          <TextField
+            label="Please Specify"
+            variant="outlined"
+            id="mui-theme-provider-outlined-input"
+            /* error */
+          />
+        </div>
+      )
   );
-
-  const updateOptions = (currentOption, currentOptionPrice) => {
-    setCurrentOption(currentOption);
-    setcurrentOptionPrice(currentOptionPrice);
-  };
 
   const prevQuestion = () => {
     if (questionIndex > 0) {
@@ -92,24 +122,26 @@ export default function MCQ(props) {
           <Button color="primary" variant="contained" onClick={nextQuestion}>
             Continue
           </Button>
-          <p>selectionType: {currQuestion.selectionType}</p>
-          <p>
-            I am a <strong>{currQuestion.selectionType}</strong> question
-          </p>
-          <p>
-            The JSX I'm using:{" "}
-            <strong>
-              {currQuestion.selectionType === "single-select"
-                ? "singleSelectQuestions"
-                : "multiSelectQuestions"}
-            </strong>
-          </p>
+          <p>How many questions: {quizData.length}</p>
           <p>questionIndex: {questionIndex}</p>
-          <p>currentOption: {currentOption}</p>
-          <p>currentOptionPrice: ${currentOptionPrice}</p>
           <p>totalPrice: ${totalPrice}</p>
         </Dialog>
       </>
     </MuiThemeProvider>
   );
 }
+
+/*
+ <p>selectionType: {currQuestion.selectionType}</p>
+<p>
+  I am a <strong>{currQuestion.selectionType}</strong> question
+</p>
+<p>
+  The JSX I'm using:{" "}
+  <strong>
+    {currQuestion.selectionType === "single-select"
+      ? "singleSelectQuestions"
+      : "multiSelectQuestions"}
+  </strong>
+</p>
+ */
