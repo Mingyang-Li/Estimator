@@ -12,6 +12,7 @@ import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
 import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
 import { quizData } from "./quizData";
 
 import Card from "@material-ui/core/Card";
@@ -125,6 +126,7 @@ export default function MCQ(props) {
     <MuiThemeProvider theme={theme}>
       <>
         <OwnAppBar title />
+
         <Dialog open fullWidth maxWidth="md">
           <FormControl component="fieldset">
             <Grid container spacing={3}>
@@ -153,6 +155,7 @@ export default function MCQ(props) {
                 : multiSelectQuestions}
             </RadioGroup>
           </FormControl>
+          <br></br>
 
           <Button
             color="secondary"
@@ -162,37 +165,40 @@ export default function MCQ(props) {
             Back to Start
           </Button>
           <Button color="secondary" variant="contained" onClick={prevQuestion}>
-            Previous Question
+            Previous
           </Button>
           <Button color="primary" variant="contained" onClick={nextQuestion}>
             {questionIndex + 1 === quizData.length
               ? "Calculate Cost"
               : "Continue"}
           </Button>
+
+          <br></br>
+
+          <Card open fullWidth maxWidth="sm" boxShadow={3}>
+            <CardContent>
+              <p>
+                <strong>All Responses: </strong>
+                {responses}
+              </p>
+              <p>
+                <strong>Selection Type (current): </strong>
+                {currQuestion.selectionType}
+              </p>
+              <p>
+                <strong>Is it compulstory? </strong>
+                {currQuestion.isCompulstory === true ? "Yes" : "No"}
+              </p>
+              <p>
+                <strong>questionIndex: </strong>
+                {questionIndex}
+              </p>
+              <p>
+                <strong>totalPrice: </strong>${totalPrice}
+              </p>
+            </CardContent>
+          </Card>
         </Dialog>
-        <Card open fullWidth maxWidth="sm">
-          <CardContent>
-            <p>
-              <strong>All Responses: </strong>
-              {responses}
-            </p>
-            <p>
-              <strong>Selection Type (current): </strong>
-              {currQuestion.selectionType}
-            </p>
-            <p>
-              <strong>Is it compulstory? </strong>
-              {currQuestion.isCompulstory === true ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>questionIndex: </strong>
-              {questionIndex}
-            </p>
-            <p>
-              <strong>totalPrice: </strong>${totalPrice}
-            </p>
-          </CardContent>
-        </Card>
       </>
     </MuiThemeProvider>
   );
