@@ -25,54 +25,63 @@ export default function MCQ(props) {
     setValue(event.target.value);
   };
 
+  // we have more single-select question so set it as default
   const [questionType, setQuestionType] = useState("single-select");
+
+  // totalPrice gets updated every time an option is clicked on
   const [totalPrice, setTotalPrice] = useState(0);
 
+  // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
   const [questionIndex, setQuestionIndex] = useState(0);
 
+  // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
   const questionNumber = questionIndex + 1;
 
-  // An array of objects
+  // An array of objects that updates whenever the user clicks on an option, be it radio button or checkboxes
+  // each response object of the array will contain the necessary data needed for cost calculation as well as options confirmation
   const [responses, updateResponses] = useState([]);
 
   function handleUpdateResponses(questionObj) {
-    console.log("handleUpdateResponses triggered");
-    const newList = responses.map((response) => {
-      const updatedResponses = [
-        ...response,
-        {
-          questionNumber: questionIndex + 1,
-          questionTopic: questionObj.questionTopic,
-          selectedAnswer: questionObj.answerText,
-          estimatedCost: questionObj.price,
-        },
-      ];
+    const newList = [...responses];
 
-      return updatedResponses;
-    });
+    const newAnswer = {
+      questionNumber: questionNumber,
+      questionTopic: questionObj.questionTopic,
+      selectionType: questionObj.selectionType,
+      selectedAnswer: questionObj.answerText,
+      estimatedCost: questionObj.price,
+    };
+    newList.push(newAnswer);
     updateResponses(newList);
   }
 
+  const captureSelectedOptions = () => {};
+
+  // singleSelectQuestions is contains a function that returns jsx, which displays the suitable components based on the question attributes.
+  // In this case, all questions should be wrapped around by radio button components because they're all single select
+  // The only exception being that, if the answerText is 'Custom', we'd want to user to also specify exactly what they want if their desired options aren't listed here.
+  // This is when we want to conditionally render jsx so that an extra textfield is also present alongside the radiobutton that has a label of 'Custom'
+  // All the mapped components from this const will be wrapped in RadioGroup component further down the final return block
   const singleSelectQuestions = currQuestion.answerOptions.map(
+    // By looping through the answerText and the price of each question object, we use a ternary operator that returns jsx for radiobuttons without an extra textfield and the jsx that has one if answerText is 'Custom'
     ({ answerText, price }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
           value={answerText}
-          control={<Radio />}
+          control={<Radio />} // normal radio button
           label={answerText}
           price={price}
-          onClick={() => handleUpdateResponses(currQuestion)}
         />
       ) : (
         <div className="customOption">
           <FormControlLabel
             value={answerText}
-            control={<Radio />}
+            control={<Radio />} // normal radio button
             label={answerText}
             price={price}
           />
-          <TextField
+          <TextField // additional TextField
             label="Please Specify"
             variant="outlined"
             id="mui-theme-provider-outlined-input"
@@ -82,6 +91,9 @@ export default function MCQ(props) {
       )
   );
 
+  // multiSelectQuestions uses roughly the same mapping logic as the one used by singleSelectQuestions
+  // The only exception is that the control attribute of each FormControlLabel is Checkbox instead of Radio
+  // This is essentially because multi-select questions require us to enable users to select more than just 1 option
   const multiSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
       answerText !== "Custom" ? (
@@ -109,14 +121,16 @@ export default function MCQ(props) {
       )
   );
 
-  const prevQuestion = () => {
+  const prevQuestion = (e) => {
+    e.preventDefault();
     if (questionIndex > 0) {
       setQuestionIndex(questionIndex - 1);
       setQuestionType(() => currQuestion.selectionType);
     }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = (e) => {
+    e.preventDefault();
     if (questionIndex < quizData.length - 1) {
       setQuestionIndex(questionIndex + 1);
       setQuestionType(() => currQuestion.selectionType);
@@ -127,7 +141,7 @@ export default function MCQ(props) {
       <>
         <OwnAppBar title />
 
-        <Dialog open fullWidth maxWidth="md">
+        <Dialog open fullWidth maxwidth="md">
           <FormControl component="fieldset">
             <Grid container spacing={3}>
               <Grid item xs>
@@ -149,7 +163,11 @@ export default function MCQ(props) {
               </Grid>
             </Grid>
             <h3 component="legend">{currQuestion.questionText}</h3>
-            <RadioGroup value={value} onChange={changedOption}>
+
+            <RadioGroup
+              value={value}
+              onChange={() => handleUpdateResponses(currQuestion)}
+            >
               {currQuestion.selectionType === "single-select"
                 ? singleSelectQuestions
                 : multiSelectQuestions}
@@ -175,11 +193,11 @@ export default function MCQ(props) {
 
           <br></br>
 
-          <Card open fullWidth maxWidth="sm" boxShadow={3}>
+          <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
               <p>
                 <strong>All Responses: </strong>
-                {responses}
+                {JSON.stringify(responses)}
               </p>
               <p>
                 <strong>Selection Type (current): </strong>
