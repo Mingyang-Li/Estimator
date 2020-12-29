@@ -33,6 +33,23 @@ export default function MCQ(props) {
   // An array of objects
   const [responses, updateResponses] = useState([]);
 
+  function handleUpdateResponses(questionObj) {
+    const newList = responses.map((response) => {
+      const updatedResponses = [
+        ...response,
+        {
+          questionNumber: questionIndex + 1,
+          questionTopic: questionObj.questionTopic,
+          selectedAnswer: questionObj.answerText,
+          estimatedCost: questionObj.price,
+        },
+      ];
+      console.log("new resp: ");
+      return updatedResponses;
+    });
+    updateResponses(newList);
+  }
+
   const promptSpecification = (e) => {
     console.log("promptSpecification");
   };
@@ -40,27 +57,15 @@ export default function MCQ(props) {
   const clearCurrentChoices = 0;
   const clearAllChoices = 0;
 
-  //whenever an option is selected, I want to update the responses array,
-  // so the total costs can be updfated at real time.
-  // The idea is to push an object into the array whenever one or multiple options are selected,
-  // and then update the responses array if the selected options doesn't exist in it.
-  /*
-
-  responses.push({
-    questionTopic: currQuestion.questionTopic,
-    selectionType: currQuestion.selectionType,
-    chosenOptions: [], // I want this arr to have the questionTopic, chosen option(s) and selection type of the selected options
-  });
-
-  */
   const singleSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
-      answerText != "Custom" ? (
+      answerText !== "Custom" ? (
         <FormControlLabel
           value={answerText}
           control={<Radio />}
           label={answerText}
           price={price}
+          onClick={() => handleUpdateResponses(currQuestion)}
         />
       ) : (
         <div className="customOption">
@@ -75,6 +80,7 @@ export default function MCQ(props) {
             variant="outlined"
             id="mui-theme-provider-outlined-input"
             /* error */
+            onClick={promptSpecification}
           />
         </div>
       )
@@ -82,7 +88,7 @@ export default function MCQ(props) {
 
   const multiSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
-      answerText != "Custom" ? (
+      answerText !== "Custom" ? (
         <FormControlLabel
           value={answerText}
           control={<Checkbox />}
@@ -110,14 +116,14 @@ export default function MCQ(props) {
   const prevQuestion = () => {
     if (questionIndex > 0) {
       setQuestionIndex(questionIndex - 1);
-      setQuestionType(currQuestion.selectionType);
+      setQuestionType(() => currQuestion.selectionType);
     }
   };
 
   const nextQuestion = () => {
     if (questionIndex < quizData.length - 1) {
       setQuestionIndex(questionIndex + 1);
-      setQuestionType(currQuestion.selectionType);
+      setQuestionType(() => currQuestion.selectionType);
     }
   };
   return (
@@ -129,6 +135,7 @@ export default function MCQ(props) {
             <h2 component="legend">
               {questionIndex + 1 + ". "}
               {currQuestion.questionTopic}
+              {currQuestion.isCompulstory === true ? "*" : ""}
             </h2>
             <h3 component="legend">{currQuestion.questionText}</h3>
             <RadioGroup value={value} onChange={changedOption}>
@@ -172,18 +179,3 @@ export default function MCQ(props) {
     </MuiThemeProvider>
   );
 }
-
-/*
- <p>selectionType: {currQuestion.selectionType}</p>
-<p>
-  I am a <strong>{currQuestion.selectionType}</strong> question
-</p>
-<p>
-  The JSX I'm using:{" "}
-  <strong>
-    {currQuestion.selectionType === "single-select"
-      ? "singleSelectQuestions"
-      : "multiSelectQuestions"}
-  </strong>
-</p>
- */
