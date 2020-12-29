@@ -11,10 +11,12 @@ import OwnAppBar from "./OwnAppBar";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
+import Grid from "@material-ui/core/Grid";
 import { quizData } from "./quizData";
 
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
 
 export default function MCQ(props) {
   const [value, setValue] = React.useState();
@@ -55,7 +57,6 @@ export default function MCQ(props) {
   };
 
   const clearCurrentChoices = 0;
-  const clearAllChoices = 0;
 
   const singleSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
@@ -132,11 +133,25 @@ export default function MCQ(props) {
         <OwnAppBar title />
         <Dialog open fullWidth maxWidth="md">
           <FormControl component="fieldset">
-            <h2 component="legend">
-              {questionIndex + 1 + ". "}
-              {currQuestion.questionTopic}
-              {currQuestion.isCompulstory === true ? "*" : ""}
-            </h2>
+            <Grid container spacing={3}>
+              <Grid item xs>
+                <h2 component="legend">
+                  {questionIndex + 1 + ". "}
+                  {currQuestion.questionTopic}
+                  {currQuestion.isCompulstory === true ? "*" : ""}
+                </h2>
+              </Grid>
+              <Grid item xs={3}></Grid>
+              <Grid item xs>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography gutterBottom>
+                      Question {questionIndex + 1} out of {quizData.length}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
             <h3 component="legend">{currQuestion.questionText}</h3>
             <RadioGroup value={value} onChange={changedOption}>
               {currQuestion.selectionType === "single-select"
@@ -145,8 +160,15 @@ export default function MCQ(props) {
             </RadioGroup>
           </FormControl>
 
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => setQuestionIndex(0)}
+          >
+            Back to Start
+          </Button>
           <Button color="secondary" variant="contained" onClick={prevQuestion}>
-            Back
+            Previous Question
           </Button>
           <Button color="primary" variant="contained" onClick={nextQuestion}>
             Continue
