@@ -36,6 +36,7 @@ export default function MCQ(props) {
   const [responses, updateResponses] = useState([]);
 
   function handleUpdateResponses(questionObj) {
+    console.log("handleUpdateResponses triggered");
     const newList = responses.map((response) => {
       const updatedResponses = [
         ...response,
@@ -46,17 +47,11 @@ export default function MCQ(props) {
           estimatedCost: questionObj.price,
         },
       ];
-      console.log("new resp: ");
+
       return updatedResponses;
     });
     updateResponses(newList);
   }
-
-  const promptSpecification = (e) => {
-    console.log("promptSpecification");
-  };
-
-  const clearCurrentChoices = 0;
 
   const singleSelectQuestions = currQuestion.answerOptions.map(
     ({ answerText, price }) =>
@@ -81,7 +76,6 @@ export default function MCQ(props) {
             variant="outlined"
             id="mui-theme-provider-outlined-input"
             /* error */
-            onClick={promptSpecification}
           />
         </div>
       )
@@ -171,7 +165,9 @@ export default function MCQ(props) {
             Previous Question
           </Button>
           <Button color="primary" variant="contained" onClick={nextQuestion}>
-            Continue
+            {questionIndex + 1 === quizData.length
+              ? "Calculate Cost"
+              : "Continue"}
           </Button>
         </Dialog>
         <Card open fullWidth maxWidth="sm">

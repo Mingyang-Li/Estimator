@@ -1,5 +1,17 @@
 export const quizData = [
   {
+    questionTopic: "Demo",
+    questionText: "Question text",
+    answerOptions: [
+      { answerText: "test1", price: 100 },
+      { answerText: "test2", price: 100 },
+      { answerText: "test3", price: 100 },
+      { answerText: "Custom", price: 0 },
+    ],
+    isCompulstory: true,
+    selectionType: "single-select",
+  },
+  {
     questionTopic: "Scale",
     questionText: "How many users will use your application?",
     answerOptions: [
