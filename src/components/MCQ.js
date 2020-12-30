@@ -15,8 +15,8 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import { quizData } from "./quizData";
 
-import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -42,24 +42,38 @@ export default function MCQ(props) {
   const questionNumber = questionIndex + 1;
 
   // An array of objects that updates whenever the user clicks on an option, be it radio button or checkboxes
-  // each response object of the array will contain the necessary data needed for cost calculation as well as options confirmation
+  // Each response object of the array will contain the necessary data needed for cost calculation as well as options confirmation
   const [responses, updateResponses] = useState([]);
 
+  // We need to capture the answer and price for every change in options for single-select questions
+  const [selectedRadioButton, updateSelectedRadioButton] = useState({});
+
+  // We also need to capture answers and prices for multi-select questions
+  // It's a good idea to store them as an array of objects
+  const [selectedCheckboxes, updateSelectedCheckboxes] = useState([]);
+
   function handleUpdateResponses(questionObj) {
+    // Keep the original array using spread operator
     const newList = [...responses];
 
+    // Make a new response object
     const newAnswer = {
       questionNumber: questionNumber,
       questionTopic: questionObj.questionTopic,
       selectionType: questionObj.selectionType,
-      selectedAnswer: questionObj.answerText,
-      estimatedCost: questionObj.price,
+      // Now, we grab the latest selected radiobutton which contains the updated option and its price.
+      // We are now able map the answer and price into the response object, which used to be inaccesible from the questionObj alone
+      // Referring to updateSelectedRadioButton, you can see its state is being updated for each options change
+      selectedAnswer: selectedRadioButton.selectedAnswer,
+      estimatedCost: selectedRadioButton.price,
     };
+
+    // Push the new response to our original array
     newList.push(newAnswer);
+
+    // Now we can ACTUALLY update the responses using the state hook updateResponses
     updateResponses(newList);
   }
-
-  const captureSelectedOptions = () => {};
 
   // singleSelectQuestions is contains a function that returns jsx, which displays the suitable components based on the question attributes.
   // In this case, all questions should be wrapped around by radio button components because they're all single select
@@ -75,6 +89,14 @@ export default function MCQ(props) {
           control={<Radio />} // normal radio button
           label={answerText}
           price={price}
+          onClick={() =>
+            // We need to capture the selected answer option and the price into a state for each option
+            // The we will pass this state (object) into the hook that handles updating the entire response object
+            updateSelectedRadioButton({
+              selectedAnswer: answerText,
+              price: price,
+            })
+          }
         />
       ) : (
         <div className="customOption">
@@ -83,6 +105,13 @@ export default function MCQ(props) {
             control={<Radio />} // normal radio button
             label={answerText}
             price={price}
+            floatingLabelFixed={true}
+            onClick={() =>
+              updateSelectedRadioButton({
+                selectedAnswer: answerText,
+                price: 0,
+              })
+            }
           />
           <TextField // additional TextField
             label="Please Specify"
@@ -124,6 +153,9 @@ export default function MCQ(props) {
       )
   );
 
+  // This function is responsible for updating the questions displayed.
+  // It does so by setting the question index each time a button using it is clicked, also it makes sure we don't have out of range indeces
+  // In addition, it resetes the questionType state, because this data is crucial to what JSX we can display (radio button or checkboxes)
   const prevQuestion = (e) => {
     e.preventDefault();
     if (questionIndex > 0) {
@@ -132,6 +164,8 @@ export default function MCQ(props) {
     }
   };
 
+  // Basically it does the same thing as prevQuestion.
+  // The only difference it that we need to make sure to fire the function that calculates total cost when we reach the end of the questions.
   const nextQuestion = (e) => {
     e.preventDefault();
     if (questionIndex < quizData.length - 1) {
@@ -139,6 +173,7 @@ export default function MCQ(props) {
       setQuestionType(() => currQuestion.selectionType);
     }
   };
+
   return (
     <MuiThemeProvider theme={theme}>
       <>
@@ -189,13 +224,26 @@ export default function MCQ(props) {
           <br></br>
 
           <Grid container spacing={2} justify="center">
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <Button color="primary" onClick={() => setQuestionIndex(0)}>
+                <ArrowBackIcon />
                 Back to Start
               </Button>
             </Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs>
+            <Grid item xs={5}>
+              <Button
+                color="primary"
+                startIcon={<DeleteIcon />}
+                onClick={
+                  questionType === "single-select"
+                    ? () => updateSelectedRadioButton({})
+                    : () => updateSelectedCheckboxes([])
+                }
+              >
+                Clear current option
+              </Button>
+            </Grid>
+            <Grid item xs={3}>
               <Button
                 color="primary"
                 startIcon={<DeleteIcon />}
@@ -211,23 +259,12 @@ export default function MCQ(props) {
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
               <p>
+                <strong>Current radio button: </strong>
+                {JSON.stringify(selectedRadioButton)}
+              </p>
+              <p>
                 <strong>All Responses: </strong>
                 {JSON.stringify(responses)}
-              </p>
-              <p>
-                <strong>Selection Type (current): </strong>
-                {currQuestion.selectionType}
-              </p>
-              <p>
-                <strong>Is it compulstory? </strong>
-                {currQuestion.isCompulstory === true ? "Yes" : "No"}
-              </p>
-              <p>
-                <strong>questionIndex: </strong>
-                {questionIndex}
-              </p>
-              <p>
-                <strong>totalPrice: </strong>${totalPrice}
               </p>
             </CardContent>
           </Card>
