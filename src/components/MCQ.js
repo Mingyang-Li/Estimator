@@ -189,20 +189,20 @@ export default function MCQ(props) {
           <br></br>
 
           <Grid container spacing={2} justify="center">
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <Button color="primary" onClick={() => setQuestionIndex(0)}>
                 Back to Start
               </Button>
             </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={2}>
-              <IconButton
-                aria-label="delete"
+            <Grid item xs={4}></Grid>
+            <Grid item xs>
+              <Button
                 color="primary"
+                startIcon={<DeleteIcon />}
                 onClick={() => updateResponses([])}
               >
-                <DeleteIcon fontSize="medium" />
-              </IconButton>
+                Clear All
+              </Button>
             </Grid>
           </Grid>
 
