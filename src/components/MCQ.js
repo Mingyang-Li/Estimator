@@ -15,6 +15,9 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import { quizData } from "./quizData";
 
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
@@ -175,13 +178,6 @@ export default function MCQ(props) {
           </FormControl>
           <br></br>
 
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={() => setQuestionIndex(0)}
-          >
-            Back to Start
-          </Button>
           <Button color="secondary" variant="contained" onClick={prevQuestion}>
             Previous
           </Button>
@@ -190,6 +186,25 @@ export default function MCQ(props) {
               ? "Calculate Cost"
               : "Continue"}
           </Button>
+          <br></br>
+
+          <Grid container spacing={2} justify="center">
+            <Grid item xs={4}>
+              <Button color="primary" onClick={() => setQuestionIndex(0)}>
+                Back to Start
+              </Button>
+            </Grid>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={2}>
+              <IconButton
+                aria-label="delete"
+                color="primary"
+                onClick={() => updateResponses([])}
+              >
+                <DeleteIcon fontSize="medium" />
+              </IconButton>
+            </Grid>
+          </Grid>
 
           <br></br>
 
