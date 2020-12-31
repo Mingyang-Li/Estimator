@@ -99,8 +99,13 @@ export const quizData = [
     answerOptions: [
       { answerText: "Stripe (Credit Card)", price: 1700 },
       { answerText: "PayPal", price: 1500 },
+
+      { answerText: "Afterpay", price: 1600 },
+      { answerText: "LayBuy", price: 1600 },
+      { answerText: "Genoapay", price: 1600 },
+
       { answerText: "Paymark", price: 1400 },
-      { answerText: "Bank Transfer", price: 1200 },
+      { answerText: "Bank Transfer", price: 1400 },
       { answerText: "Paystation", price: 1400 },
       { answerText: "Custom", price: 0 },
     ],

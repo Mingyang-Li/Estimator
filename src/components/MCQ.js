@@ -28,18 +28,11 @@ export default function MCQ(props) {
     setValue(event.target.value);
   };
 
-  // we have more single-select question so set it as default
-  const [questionType, setQuestionType] = useState("single-select");
-
-  // totalPrice gets updated every time an option is clicked on
-  const [totalPrice, setTotalPrice] = useState(0);
-
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(5);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
-  const questionNumber = questionIndex + 1;
 
   // An array of objects that updates whenever the user clicks on an option, be it radio button or checkboxes
   // Each response object of the array will contain the necessary data needed for cost calculation as well as options confirmation
@@ -51,6 +44,11 @@ export default function MCQ(props) {
   // We also need to capture answers and prices for multi-select questions
   // It's a good idea to store them as an array of objects
   const [selectedCheckboxes, updateSelectedCheckboxes] = useState([]);
+
+  // totalPrice gets updated every time an option is clicked on
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  const questionNumber = questionIndex + 1;
 
   function handleUpdateResponses(questionObj) {
     // Keep the original array using spread operator
@@ -68,7 +66,10 @@ export default function MCQ(props) {
       estimatedCost: selectedRadioButton.price,
     };
 
-    // Push the new response to our original array
+    // If the new option selected is for a different question, we push the new response to our original array
+    // If we are still on the same question but chose a different option we update our option.
+    // Update is done by checking question number.
+    // We replace the original obj with the same question number
     newList.push(newAnswer);
 
     // Now we can ACTUALLY update the responses using the state hook updateResponses
@@ -130,10 +131,20 @@ export default function MCQ(props) {
     ({ answerText, price }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
+          className="currentCheckbox"
           value={answerText}
           control={<Checkbox />}
           label={answerText}
           price={price}
+          onChange={() =>
+            updateSelectedCheckboxes([
+              ...selectedCheckboxes,
+              {
+                selectedAnswer: answerText,
+                price: price,
+              },
+            ])
+          }
         />
       ) : (
         <div className="customOption">
@@ -154,23 +165,18 @@ export default function MCQ(props) {
   );
 
   // This function is responsible for updating the questions displayed.
-  // It does so by setting the question index each time a button using it is clicked, also it makes sure we don't have out of range indeces
-  // In addition, it resetes the questionType state, because this data is crucial to what JSX we can display (radio button or checkboxes)
-  const prevQuestion = (e) => {
-    e.preventDefault();
+  // It does so by setting the question index each time a <Button> using it is clicked, also it makes sure we don't use indeces that are out of range.
+  const prevQuestion = () => {
     if (questionIndex > 0) {
       setQuestionIndex(questionIndex - 1);
-      setQuestionType(() => currQuestion.selectionType);
     }
   };
 
   // Basically it does the same thing as prevQuestion.
   // The only difference it that we need to make sure to fire the function that calculates total cost when we reach the end of the questions.
-  const nextQuestion = (e) => {
-    e.preventDefault();
+  const nextQuestion = () => {
     if (questionIndex < quizData.length - 1) {
       setQuestionIndex(questionIndex + 1);
-      setQuestionType(() => currQuestion.selectionType);
     }
   };
 
@@ -235,12 +241,14 @@ export default function MCQ(props) {
                 color="primary"
                 startIcon={<DeleteIcon />}
                 onClick={
-                  questionType === "single-select"
+                  currQuestion.selectionType === "single-select"
                     ? () => updateSelectedRadioButton({})
                     : () => updateSelectedCheckboxes([])
                 }
               >
-                Clear current option
+                {currQuestion.selectionType === "single-select"
+                  ? "Clear current option"
+                  : "Clear current options"}
               </Button>
             </Grid>
             <Grid item xs={3}>
@@ -259,8 +267,21 @@ export default function MCQ(props) {
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
               <p>
-                <strong>Current radio button: </strong>
-                {JSON.stringify(selectedRadioButton)}
+                <strong>Current question type: </strong>
+                {currQuestion.selectionType}
+              </p>
+
+              <p>
+                <strong>
+                  Current{" "}
+                  {currQuestion.selectionType === "single-select"
+                    ? "radio button"
+                    : "selected options"}
+                  :{" "}
+                </strong>
+                {currQuestion.selectionType === "single-select"
+                  ? JSON.stringify(selectedRadioButton)
+                  : JSON.stringify(selectedCheckboxes)}
               </p>
               <p>
                 <strong>All Responses: </strong>
