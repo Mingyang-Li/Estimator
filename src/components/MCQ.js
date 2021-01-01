@@ -22,7 +22,7 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 
-export default function MCQ(props) {
+const MCQ = (props) => {
   const [value, setValue] = React.useState();
   const changedOption = (event) => {
     setValue(event.target.value);
@@ -41,40 +41,95 @@ export default function MCQ(props) {
   // We need to capture the answer and price for every change in options for single-select questions
   const [selectedRadioButton, updateSelectedRadioButton] = useState({});
 
+  // Capturing and upadting custom option specifications
+  const [specifications, updateSpecifications] = useState("");
+
   // We also need to capture answers and prices for multi-select questions
   // It's a good idea to store them as an array of objects
   const [selectedCheckboxes, updateSelectedCheckboxes] = useState([]);
+
+  // Define a state to keep track of 'check' status of radio buttons and checkboxes
+  // This returns a boolean, and will be updates to true when people manuallu uncheck or clear their options during the quiz
+  const [checkStatus, setCheckStatus] = useState(false);
 
   // totalPrice gets updated every time an option is clicked on
   const [totalPrice, setTotalPrice] = useState(0);
 
   const questionNumber = questionIndex + 1;
 
-  function handleUpdateResponses(questionObj) {
+  const handleUpdateResponses = (questionObj) => {
     // Keep the original array using spread operator
     const newList = [...responses];
 
-    // Make a new response object
-    const newAnswer = {
-      questionNumber: questionNumber,
-      questionTopic: questionObj.questionTopic,
-      selectionType: questionObj.selectionType,
-      // Now, we grab the latest selected radiobutton which contains the updated option and its price.
-      // We are now able map the answer and price into the response object, which used to be inaccesible from the questionObj alone
-      // Referring to updateSelectedRadioButton, you can see its state is being updated for each options change
-      selectedAnswer: selectedRadioButton.selectedAnswer,
-      estimatedCost: selectedRadioButton.price,
+    const withSpecs = () => {
+      if (currQuestion.selectedAnswer === "Custom") {
+        return true;
+      }
+      return false;
     };
 
-    // If the new option selected is for a different question, we push the new response to our original array
-    // If we are still on the same question but chose a different option we update our option.
-    // Update is done by checking question number.
-    // We replace the original obj with the same question number
-    newList.push(newAnswer);
+    const newAnswer = {};
+    // if the option with specification is selected,
+    // we need to include the specs text within the object we're going to push into the overall responses
+    // If no custom option is selected, we create the object without adding the specifications key
 
-    // Now we can ACTUALLY update the responses using the state hook updateResponses
+    // First, we deal with single-select questions
+    if (currQuestion.selectionType == "single-select") {
+      // if the user selected a custom option, we need to have specification input passed into the object
+      if (withSpecs) {
+        newAnswer = {
+          questionNumber: questionNumber,
+          questionTopic: questionObj.questionTopic,
+          selectionType: questionObj.selectionType,
+          selectedAnswer: selectedRadioButton.selectedAnswer,
+          specifications: specifications,
+          estimatedCost: selectedRadioButton.price,
+        };
+      }
+      // If no custom option is selected, we don't need to add specs text in the object
+      newAnswer = {
+        questionNumber: questionNumber,
+        questionTopic: questionObj.questionTopic,
+        selectionType: questionObj.selectionType,
+        selectedAnswer: selectedRadioButton.selectedAnswer,
+        estimatedCost: selectedRadioButton.price,
+      };
+    }
+    // I couldn've just say 'else', but I need to make the code more intuitive to follow
+    // This code allows people to know the selecttion type of multi-select straightaway
+    else if (currQuestion.selectionType == "multi-select") {
+      // We need to access the last object of the selectedCheckboxes array to proceed
+      // This is because whenever a checkbox is checked, the data (obj) is added to the end of the array of objects
+      // We only want to capture the latest piece of obj to access its attributes.
+      const latestAddedCheckbox =
+        selectedCheckboxes[selectedCheckboxes.length - 1];
+
+      // Again, we check if specifications are made
+      // Same logic as handling them in singleSelect questions
+      if (withSpecs) {
+        newAnswer = {
+          questionNumber: questionNumber,
+          questionTopic: questionObj.questionTopic,
+          selectionType: questionObj.selectionType,
+          selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
+          specifications: specifications,
+          estimatedCost: latestAddedCheckbox.price,
+        };
+      }
+      // If no custom option is selected, we don't need to add specs text in the object
+      newAnswer = {
+        questionNumber: questionNumber,
+        questionTopic: questionObj.questionTopic,
+        selectionType: questionObj.selectionType,
+        selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
+        specifications: specifications,
+        estimatedCost: latestAddedCheckbox.price,
+      };
+    }
+
+    newList.push(newAnswer);
     updateResponses(newList);
-  }
+  };
 
   // singleSelectQuestions is contains a function that returns jsx, which displays the suitable components based on the question attributes.
   // In this case, all questions should be wrapped around by radio button components because they're all single select
@@ -102,23 +157,24 @@ export default function MCQ(props) {
       ) : (
         <div className="customOption">
           <FormControlLabel
+            control={<Radio />}
             value={answerText}
-            control={<Radio />} // normal radio button
-            label={answerText}
             price={price}
             floatingLabelFixed={true}
-            onClick={() =>
-              updateSelectedRadioButton({
-                selectedAnswer: answerText,
-                price: 0,
-              })
+            label={
+              <TextField
+                required
+                label="Please Specify"
+                onchange={(e) => updateSpecifications(e.target.value)}
+                onClick={() =>
+                  updateSelectedRadioButton({
+                    selectedAnswer: answerText,
+                    specifications: specifications,
+                    price: 0,
+                  })
+                }
+              />
             }
-          />
-          <TextField // additional TextField
-            label="Please Specify"
-            variant="outlined"
-            id="mui-theme-provider-outlined-input"
-            /* error */
           />
         </div>
       )
@@ -149,16 +205,28 @@ export default function MCQ(props) {
       ) : (
         <div className="customOption">
           <FormControlLabel
+            checked={false}
             value={answerText}
             control={<Checkbox />}
             label={answerText}
             price={price}
-          />
-          <TextField
-            label="Please Specify"
-            variant="outlined"
-            id="mui-theme-provider-outlined-input"
-            /* error */
+            label={
+              <TextField
+                required
+                label="Please Specify"
+                onchange={(e) => updateSpecifications(e.target.value)}
+                onClick={() =>
+                  updateSelectedCheckboxes([
+                    ...selectedCheckboxes,
+                    {
+                      selectedAnswer: answerText,
+                      specifications: specifications,
+                      price: 0,
+                    },
+                  ])
+                }
+              />
+            }
           />
         </div>
       )
@@ -178,6 +246,11 @@ export default function MCQ(props) {
     if (questionIndex < quizData.length - 1) {
       setQuestionIndex(questionIndex + 1);
     }
+  };
+
+  const clearAll = () => {
+    updateResponses([]);
+    setCheckStatus(false);
   };
 
   return (
@@ -255,7 +328,7 @@ export default function MCQ(props) {
               <Button
                 color="primary"
                 startIcon={<DeleteIcon />}
-                onClick={() => updateResponses([])}
+                onClick={clearAll}
               >
                 Clear All
               </Button>
@@ -293,4 +366,5 @@ export default function MCQ(props) {
       </>
     </MuiThemeProvider>
   );
-}
+};
+export default MCQ;
