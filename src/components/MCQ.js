@@ -56,6 +56,7 @@ const MCQ = (props) => {
   // Define a state to keep track of 'check' status of radio buttons and checkboxes
   // This returns a boolean, and will be updates to true when people manuallu uncheck or clear their options during the quiz
   const [checkStatus, setCheckStatus] = useState(false);
+  const [otherInfo, setOtherInfo] = useState("");
 
   // totalPrice gets updated every time an option is clicked on
   const [totalPrice, setTotalPrice] = useState(0);
@@ -76,7 +77,7 @@ const MCQ = (props) => {
       if (selectedRadioButton.selectedAnswer != "Custom") {
         console.log("NO custom option");
         const newAnswer = {
-          questionNumber: questionNumber,
+          questionNumber: currQuestion.questionNumber,
           questionTopic: questionObj.questionTopic,
           selectionType: questionObj.selectionType,
           selectedAnswer: selectedRadioButton.selectedAnswer,
@@ -88,7 +89,7 @@ const MCQ = (props) => {
       else if (selectedRadioButton.selectedAnswer == "Custom") {
         console.log("Yes, custom option");
         const newAnswer = {
-          questionNumber: questionNumber,
+          questionNumber: currQuestion.questionNumber,
           questionTopic: questionObj.questionTopic,
           selectionType: questionObj.selectionType,
           selectedAnswer: selectedRadioButton.selectedAnswer,
@@ -109,7 +110,7 @@ const MCQ = (props) => {
       // Same logic as handling responses for singleSelect questions
       if (currQuestion.selectedAnswer === "Custom") {
         const newAnswer = {
-          questionNumber: questionNumber,
+          questionNumber: currQuestion.questionNumber,
           questionTopic: questionObj.questionTopic,
           selectionType: questionObj.selectionType,
           selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
@@ -119,39 +120,30 @@ const MCQ = (props) => {
       }
       // If no custom option is selected, we don't need to add specs text in the object
       else {
+        const newResponse = [...selectedCheckboxes];
         const newAnswer = {
-          questionNumber: questionNumber,
+          questionNumber: currQuestion.questionNumber,
           questionTopic: questionObj.questionTopic,
           selectionType: questionObj.selectionType,
           selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
           specifications: specifications,
           estimatedCost: latestAddedCheckbox.price,
         };
+        newResponse.push(newAnswer);
+        updateSelectedCheckboxes(newResponse);
       }
     }
   }
 
-  /*
-  function handleCheckboxes(answerText, price) {
-    if (selectedCheckboxes.length == 0) {
-      updateSelectedCheckboxes([
-        {
-          selectedAnswer: answerText,
-          price: price,
-        },
-      ]);
-    } else {
-      const selectedOptions = selectedCheckboxes.map(
-        (selectedCheckboxes) => selectedCheckboxes.selectedAnswer
-      );
-      updateSelectedCheckboxes(selectedOptions);
-      console.log("selectedOptions: " + selectedOptions);
-      for (let i = 0; i < selectedCheckboxes.length; i++) {
-        console.log("new item, so added into array");
-      }
-    }
+  function handleCustomRadioButton(answerText, price) {
+    setCheckStatus(!checkStatus);
+    updateSelectedRadioButton({
+      questionNumber: currQuestion.questionNumber,
+      selectedAnswer: answerText,
+      price: price,
+      specifications: specifications,
+    });
   }
-*/
 
   // singleSelectQuestions is contains a function that returns jsx, which displays the suitable components based on the question attributes.
   // In this case, all questions should be wrapped around by radio button components because they're all single select
@@ -172,6 +164,7 @@ const MCQ = (props) => {
 
           onClick={() =>
             updateSelectedRadioButton({
+              questionNumber: currQuestion.questionNumber,
               selectedAnswer: answerText,
               price: price,
             })
@@ -180,28 +173,47 @@ const MCQ = (props) => {
       ) : (
         <div className="customOption">
           <FormControlLabel
-            control={<Radio />}
-            value={answerText}
-            price={price}
-            floatingLabelFixed={true}
-            label={
-              <TextField
-                required
-                label="Please Specify"
-                onKeyDown={(e) => updateSpecifications(e.target.value)}
+            control={
+              <Radio
+                // checked={checkStatus}
+                onClick={() => handleCustomRadioButton(answerText, price)}
+                value={answerText}
+                price={price}
+                floatingLabelFixed={true}
+                label="other"
               />
             }
-            onClick={() =>
-              updateSelectedRadioButton({
-                selectedAnswer: answerText,
-                specifications: specifications,
-                price: 0,
-              })
+            label={
+              checkStatus ? (
+                <TextField
+                  // disabled={!checkStatus}
+                  label="Please Specify"
+                  onKeyDown={(e) => updateSpecifications(e.target.value)}
+                />
+              ) : (
+                "Other"
+              )
             }
           />
         </div>
       )
   );
+
+  function handleCheckboxes(answerText, price) {
+    setCheckStatus(!checkStatus);
+    if (checkStatus) {
+      updateSelectedCheckboxes([
+        ...selectedCheckboxes,
+        {
+          questionNumber: currQuestion.questionNumber,
+          selectedAnswer: answerText,
+          price: price,
+        },
+      ]);
+    } else {
+      selectedCheckboxes.pop();
+    }
+  }
 
   // multiSelectQuestions uses roughly the same mapping logic as the one used by singleSelectQuestions
   // The only exception is that the control attribute of each FormControlLabel is Checkbox instead of Radio
@@ -210,20 +222,16 @@ const MCQ = (props) => {
     ({ answerText, price }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
-          className="currentCheckbox"
-          value={answerText}
-          control={<Checkbox />}
+          control={
+            <Checkbox
+              checked={checkStatus}
+              onClick={() => handleCheckboxes(answerText, price)}
+              value={answerText}
+              floatingLabelFixed={true}
+            />
+          }
           label={answerText}
           price={price}
-          onClick={() =>
-            updateSelectedCheckboxes([
-              ...selectedCheckboxes,
-              {
-                selectedAnswer: answerText,
-                price: price,
-              },
-            ])
-          }
         />
       ) : (
         <div className="customOption">
@@ -306,7 +314,7 @@ const MCQ = (props) => {
 
             <RadioGroup
               value={value}
-              onChange={() => handleUpdateResponses(currQuestion)}
+              // onChange={() => handleUpdateResponses(currQuestion)}
             >
               {currQuestion.selectionType === "single-select"
                 ? singleSelectQuestions
@@ -362,6 +370,7 @@ const MCQ = (props) => {
 
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
+              <p>Specs: {specifications}</p>
               <p>
                 <strong>Current question type: </strong>
                 {currQuestion.selectionType}

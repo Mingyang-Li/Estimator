@@ -1,17 +1,6 @@
 export const quizData = [
   {
-    questionTopic: "Demo",
-    questionText: "Question text",
-    answerOptions: [
-      { answerText: "test1", price: 100 },
-      { answerText: "test2", price: 100 },
-      { answerText: "test3", price: 100 },
-      { answerText: "Custom", price: 0 },
-    ],
-    isCompulstory: true,
-    selectionType: "single-select",
-  },
-  {
+    questionNumber: 1,
     questionTopic: "Scale",
     questionText: "How many users will use your application?",
     answerOptions: [
@@ -25,6 +14,7 @@ export const quizData = [
     selectionType: "single-select",
   },
   {
+    questionNumber: 2,
     questionTopic: "Purpose",
     questionText: "What will you use it for?",
     answerOptions: [
@@ -41,6 +31,7 @@ export const quizData = [
     selectionType: "single-select",
   },
   {
+    questionNumber: 3,
     questionTopic: "Management",
     questionText:
       "Would you like to be able edit content of your application by yourself? (CMS)",
@@ -52,6 +43,7 @@ export const quizData = [
     selectionType: "single-select",
   },
   {
+    questionNumber: 4,
     questionTopic: "Appearance",
     questionText:
       "How pretty would you like your application to appear towards users?",
@@ -64,6 +56,7 @@ export const quizData = [
     selectionType: "single-select",
   },
   {
+    questionNumber: 5,
     questionTopic: "Users",
     questionText: "How will people use your application?",
     answerOptions: [
@@ -78,6 +71,7 @@ export const quizData = [
     selectionType: "multi-select",
   },
   {
+    questionNumber: 6,
     questionTopic: "Content Generation",
     questionText: "How will you generate content to your application?",
     answerOptions: [
@@ -94,6 +88,7 @@ export const quizData = [
     selectionType: "multi-select",
   },
   {
+    questionNumber: 7,
     questionTopic: "Payment Integration",
     questionText: "How would you like the web app to process payments?",
     answerOptions: [
@@ -111,5 +106,18 @@ export const quizData = [
     ],
     isCompulstory: false,
     selectionType: "multi-select",
+  },
+  {
+    questionNumber: 0,
+    questionTopic: "Demo",
+    questionText: "Question text",
+    answerOptions: [
+      { answerText: "test1", price: 100 },
+      { answerText: "test2", price: 100 },
+      { answerText: "test3", price: 100 },
+      { answerText: "Custom", price: 0 },
+    ],
+    isCompulstory: true,
+    selectionType: "single-select",
   },
 ];
