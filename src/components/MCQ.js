@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -199,32 +199,41 @@ const MCQ = (props) => {
       )
   );
 
+  // We initialise an array of 'false' for arrCheckedStatus
+  // It depends on the length of the options for each question.
+  // I.e, if there're 8 options, there'll be 8 'false' created in arrCheckedStatus
+  const [arrCheckedStatus, setArrCheckedStatus] = useState([
+    false * currQuestion.answerOptions.length,
+  ]);
+
   function handleCheckboxes(answerText, price) {
-    setCheckStatus(!checkStatus);
-    if (checkStatus) {
-      updateSelectedCheckboxes([
-        ...selectedCheckboxes,
-        {
-          questionNumber: currQuestion.questionNumber,
-          selectedAnswer: answerText,
-          price: price,
-        },
-      ]);
-    } else {
-      selectedCheckboxes.pop();
+    console.log("arrCheckedStatus: " + arrCheckedStatus);
+    /*
+    for (let i = 0; i < currQuestion.answerOptions.length; i++) {
+      var currOptions = currQuestion.answerOptions;
+      console.log("testing" + arrCheckedStatus[i] === false);
+      if (currOptions[i].answerText == answerText) {
+        if (arrCheckedStatus[i] === false) {
+          arrCheckedStatus.splice(i, 1, true);
+
+        } else {
+          arrCheckedStatus.splice(i, 1, false);
+        }
+      }
     }
+    */
   }
 
   // multiSelectQuestions uses roughly the same mapping logic as the one used by singleSelectQuestions
   // The only exception is that the control attribute of each FormControlLabel is Checkbox instead of Radio
   // This is essentially because multi-select questions require us to enable users to select more than just 1 option
   const multiSelectQuestions = currQuestion.answerOptions.map(
-    ({ answerText, price }) =>
+    ({ answerText, price, index }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
           control={
             <Checkbox
-              checked={checkStatus}
+              checked={arrCheckedStatus[index]}
               onClick={() => handleCheckboxes(answerText, price)}
               value={answerText}
               floatingLabelFixed={true}
@@ -370,6 +379,8 @@ const MCQ = (props) => {
 
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
+              <p>Checkboxes: {JSON.stringify(selectedCheckboxes)}</p>
+              <p>Checked status: {JSON.stringify(arrCheckedStatus)}</p>
               <p>Specs: {specifications}</p>
               <p>
                 <strong>Current question type: </strong>
@@ -384,6 +395,7 @@ const MCQ = (props) => {
                     : "checkboxes "}
                   :{" "}
                 </strong>
+
                 {currQuestion.selectionType === "single-select"
                   ? JSON.stringify(selectedRadioButton)
                   : JSON.stringify(selectedCheckboxes)}
