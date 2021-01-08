@@ -30,7 +30,7 @@ const MCQ = (props) => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(5);
+  const [questionIndex, setQuestionIndex] = useState(4);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -126,7 +126,6 @@ const MCQ = (props) => {
           questionTopic: questionObj.questionTopic,
           selectionType: questionObj.selectionType,
           selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
-          specifications: specifications,
           estimatedCost: latestAddedCheckbox.price,
         };
         newResponse.push(newAnswer);
@@ -145,6 +144,7 @@ const MCQ = (props) => {
     });
   }
 
+  var dynamicIndex = 0;
   // singleSelectQuestions is contains a function that returns jsx, which displays the suitable components based on the question attributes.
   // In this case, all questions should be wrapped around by radio button components because they're all single select
   // The only exception being that, if the answerText is 'Custom', we'd want to user to also specify exactly what they want if their desired options aren't listed here.
@@ -155,6 +155,7 @@ const MCQ = (props) => {
     ({ answerText, price }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
+          index={dynamicIndex++}
           value={answerText}
           control={<Radio />} // normal radio button
           label={answerText}
@@ -173,6 +174,7 @@ const MCQ = (props) => {
       ) : (
         <div className="customOption">
           <FormControlLabel
+            index={dynamicIndex++}
             control={
               <Radio
                 // checked={checkStatus}
@@ -191,7 +193,7 @@ const MCQ = (props) => {
                   onKeyDown={(e) => updateSpecifications(e.target.value)}
                 />
               ) : (
-                "Other"
+                answerText
               )
             }
           />
@@ -199,41 +201,59 @@ const MCQ = (props) => {
       )
   );
 
-  // We initialise an array of 'false' for arrCheckedStatus
+  // We initialise an array of 'false' for myArr
   // It depends on the length of the options for each question.
-  // I.e, if there're 8 options, there'll be 8 'false' created in arrCheckedStatus
-  const [arrCheckedStatus, setArrCheckedStatus] = useState([
-    false * currQuestion.answerOptions.length,
-  ]);
+  // I.e, if there're 8 options, there'll be 8 'false' created in myArr
+  var myArr = [];
+  for (let i = 0; i < currQuestion.answerOptions.length; i++) {
+    myArr.push(false);
+  }
+  // Set a state for check status array and its updater method
+  const [arrCheckedStatus, updateArrCheckStatus] = useState(myArr);
 
   function handleCheckboxes(answerText, price) {
-    console.log("arrCheckedStatus: " + arrCheckedStatus);
-    /*
-    for (let i = 0; i < currQuestion.answerOptions.length; i++) {
-      var currOptions = currQuestion.answerOptions;
-      console.log("testing" + arrCheckedStatus[i] === false);
-      if (currOptions[i].answerText == answerText) {
-        if (arrCheckedStatus[i] === false) {
-          arrCheckedStatus.splice(i, 1, true);
+    const currAnswers = Object.values(selectedCheckboxes);
+    const availableOptions = currQuestion.answerOptions.map(
+      (answerOptions) => answerOptions.answerText
+    );
+    console.log("availableOptions: " + availableOptions);
+    const index = availableOptions.indexOf(answerText);
 
-        } else {
-          arrCheckedStatus.splice(i, 1, false);
-        }
+    // Updating the boolean value of check status of the equivalent checkbox state.
+    arrCheckedStatus[index] = !arrCheckedStatus[index];
+    console.log(arrCheckedStatus[index]);
+
+    // if current answers do not include the latest clicked option,
+    // We simply add it as a new object into selectedCheckboxes
+    if (!currAnswers.includes(answerText)) {
+      console.log("will add new item");
+      updateSelectedCheckboxes([
+        ...selectedCheckboxes,
+        {
+          selectedAnswer: answerText,
+          price: price,
+        },
+      ]);
+    } else {
+      // If an option is clicked BUT the checkbox is being UNCHECKED,
+      // We need to remove the equivalent object from selectedCheckboxes
+      if (arrCheckedStatus[index] === false) {
+        selectedCheckboxes.splice(selectedCheckboxes.length - 1, 1);
       }
     }
-    */
   }
 
   // multiSelectQuestions uses roughly the same mapping logic as the one used by singleSelectQuestions
   // The only exception is that the control attribute of each FormControlLabel is Checkbox instead of Radio
   // This is essentially because multi-select questions require us to enable users to select more than just 1 option
+
   const multiSelectQuestions = currQuestion.answerOptions.map(
-    ({ answerText, price, index }) =>
+    ({ answerText, price }) =>
       answerText !== "Custom" ? (
         <FormControlLabel
+          index={dynamicIndex++}
           control={
             <Checkbox
-              checked={arrCheckedStatus[index]}
               onClick={() => handleCheckboxes(answerText, price)}
               value={answerText}
               floatingLabelFixed={true}
@@ -245,6 +265,7 @@ const MCQ = (props) => {
       ) : (
         <div className="customOption">
           <FormControlLabel
+            index={dynamicIndex++}
             value={answerText}
             control={<Checkbox />}
             label={answerText}
@@ -291,6 +312,7 @@ const MCQ = (props) => {
 
     setCheckStatus(false);
     updateSpecifications("");
+    arrCheckedStatus = [];
   };
 
   return (
@@ -379,14 +401,10 @@ const MCQ = (props) => {
 
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
-              <p>Checkboxes: {JSON.stringify(selectedCheckboxes)}</p>
-              <p>Checked status: {JSON.stringify(arrCheckedStatus)}</p>
-              <p>Specs: {specifications}</p>
               <p>
-                <strong>Current question type: </strong>
-                {currQuestion.selectionType}
+                <strong>Checked status:</strong>{" "}
+                {JSON.stringify(arrCheckedStatus)}
               </p>
-
               <p>
                 <strong>
                   Current{" "}
@@ -400,6 +418,14 @@ const MCQ = (props) => {
                   ? JSON.stringify(selectedRadioButton)
                   : JSON.stringify(selectedCheckboxes)}
               </p>
+              <p>
+                <strong>Specs:</strong> {specifications}
+              </p>
+              <p>
+                <strong>Current question type: </strong>
+                {currQuestion.selectionType}
+              </p>
+
               <p>
                 <strong>All Responses: </strong>
                 {JSON.stringify(responses)}
