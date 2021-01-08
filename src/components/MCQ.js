@@ -216,29 +216,35 @@ const MCQ = (props) => {
     const availableOptions = currQuestion.answerOptions.map(
       (answerOptions) => answerOptions.answerText
     );
-    console.log("availableOptions: " + availableOptions);
     const index = availableOptions.indexOf(answerText);
-
     // Updating the boolean value of check status of the equivalent checkbox state.
     arrCheckedStatus[index] = !arrCheckedStatus[index];
-    console.log(arrCheckedStatus[index]);
-
     // if current answers do not include the latest clicked option,
     // We simply add it as a new object into selectedCheckboxes
     if (!currAnswers.includes(answerText)) {
-      console.log("will add new item");
-      updateSelectedCheckboxes([
-        ...selectedCheckboxes,
-        {
-          selectedAnswer: answerText,
-          price: price,
-        },
-      ]);
-    } else {
+      if (arrCheckedStatus[index]) {
+        updateSelectedCheckboxes([
+          ...selectedCheckboxes,
+          {
+            selectedAnswer: answerText,
+            price: price,
+          },
+        ]);
+      }
+      // console.log("updated array: " + selectedCheckboxes);
+    } else if (arrCheckedStatus[index]) {
       // If an option is clicked BUT the checkbox is being UNCHECKED,
       // We need to remove the equivalent object from selectedCheckboxes
-      if (arrCheckedStatus[index] === false) {
-        selectedCheckboxes.splice(selectedCheckboxes.length - 1, 1);
+      console.log("we're getting rid of the unchecked obj");
+
+      const newCheckboxes = selectedCheckboxes;
+      for (let i = 0; i < selectedCheckboxes.length; i++) {
+        if (selectedCheckboxes[i].selectedAnswer === answerText) {
+          var deleted = newCheckboxes.pop(i);
+          updateSelectedCheckboxes(newCheckboxes);
+          console.log("deleted item after unchecking: " + deleted);
+          break;
+        }
       }
     }
   }
@@ -254,6 +260,7 @@ const MCQ = (props) => {
           index={dynamicIndex++}
           control={
             <Checkbox
+              checked={arrCheckedStatus[dynamicIndex++]}
               onClick={() => handleCheckboxes(answerText, price)}
               value={answerText}
               floatingLabelFixed={true}
@@ -301,6 +308,7 @@ const MCQ = (props) => {
       updateSelectedRadioButton({});
       updateSelectedCheckboxes([]);
       updateSpecifications("");
+      // updateArrCheckStatus();
     }
   };
 
@@ -312,7 +320,6 @@ const MCQ = (props) => {
 
     setCheckStatus(false);
     updateSpecifications("");
-    arrCheckedStatus = [];
   };
 
   return (
