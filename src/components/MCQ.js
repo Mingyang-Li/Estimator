@@ -30,7 +30,7 @@ const MCQ = (props) => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(4);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -63,6 +63,14 @@ const MCQ = (props) => {
 
   const questionNumber = questionIndex + 1;
 
+  const answeredQuestions = () => {
+    let questioNumsArr = [];
+    for (let i = 0; i < responses.length; i++) {
+      questioNumsArr.push(responses[i].questionNumber);
+    }
+    return questioNumsArr;
+  };
+
   function handleUpdateResponses(questionObj) {
     // Keep the original array using spread operator
     const newList = [...responses];
@@ -70,23 +78,10 @@ const MCQ = (props) => {
     // If the option with specification is selected,
     // we need to include the specs text within the object we're going to push into the overall responses
     // If no custom option is selected, we create the object without adding the specifications key
-
     // First, we deal with single-select questions
     if (currQuestion.selectionType === "single-select") {
       // If the user selected a custom option, we need to have specification input passed into the object
       if (selectedRadioButton.selectedAnswer != "Custom") {
-        console.log("NO custom option");
-        const newAnswer = {
-          questionNumber: currQuestion.questionNumber,
-          questionTopic: questionObj.questionTopic,
-          selectionType: questionObj.selectionType,
-          selectedAnswer: selectedRadioButton.selectedAnswer,
-          estimatedCost: selectedRadioButton.price,
-        };
-        updateResponses([newAnswer]);
-      }
-      // If no custom option is selected, we don't need to add specs text in the object
-      else if (selectedRadioButton.selectedAnswer == "Custom") {
         console.log("Yes, custom option");
         const newAnswer = {
           questionNumber: currQuestion.questionNumber,
@@ -94,10 +89,34 @@ const MCQ = (props) => {
           selectionType: questionObj.selectionType,
           selectedAnswer: selectedRadioButton.selectedAnswer,
           estimatedCost: selectedRadioButton.price,
-          specifications: specifications,
         };
-
-        updateResponses([newAnswer]);
+        newList.push(newAnswer);
+        updateResponses(newList);
+      }
+      // If no custom option is selected, we don't need to add specs text in the object
+      else if (selectedRadioButton.selectedAnswer == "Custom") {
+        console.log("No custom option, res length is " + responses.length);
+        // If radiobutton selected is for the same question
+        // And if the latest selected answer is different to the one existed for that same qs, update it in-place.
+        for (let i = 0; i < responses.length; i++) {
+          if (
+            selectedRadioButton.questionNumber === responses[i].questionNumber
+          ) {
+            const newAnswer = {
+              questionNumber: currQuestion.questionNumber,
+              questionTopic: questionObj.questionTopic,
+              selectionType: questionObj.selectionType,
+              selectedAnswer: selectedRadioButton.selectedAnswer,
+              estimatedCost: selectedRadioButton.price,
+              specifications: specifications,
+            };
+            const newResponse = responses[i];
+            newResponse[i] = newAnswer;
+            newList.push(newAnswer);
+            updateResponses(newList);
+            break;
+          }
+        }
       }
     } else if (currQuestion.selectionType == "multi-select") {
       // We need to access the last object of the selectedCheckboxes array to proceed
@@ -117,6 +136,8 @@ const MCQ = (props) => {
           specifications: specifications,
           estimatedCost: latestAddedCheckbox.price,
         };
+        newList.push(newAnswer);
+        updateSelectedCheckboxes(newList);
       }
       // If no custom option is selected, we don't need to add specs text in the object
       else {
@@ -128,8 +149,8 @@ const MCQ = (props) => {
           selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
           estimatedCost: latestAddedCheckbox.price,
         };
-        newResponse.push(newAnswer);
-        updateSelectedCheckboxes(newResponse);
+        newList.push(newAnswer);
+        updateSelectedCheckboxes(newList);
       }
     }
   }
@@ -402,7 +423,7 @@ const MCQ = (props) => {
 
             <RadioGroup
               value={value}
-              // onChange={() => handleUpdateResponses(currQuestion)}
+              onChange={() => handleUpdateResponses(currQuestion)}
             >
               {currQuestion.selectionType === "single-select"
                 ? singleSelectQuestions
@@ -482,7 +503,6 @@ const MCQ = (props) => {
                 <strong>Current question type: </strong>
                 {currQuestion.selectionType}
               </p>
-
               <p>
                 <strong>All Responses: </strong>
                 {JSON.stringify(responses)}
