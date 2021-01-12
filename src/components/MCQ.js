@@ -204,12 +204,19 @@ const MCQ = (props) => {
   // We initialise an array of 'false' for myArr
   // It depends on the length of the options for each question.
   // I.e, if there're 8 options, there'll be 8 'false' created in myArr
-  var myArr = [];
-  for (let i = 0; i < currQuestion.answerOptions.length; i++) {
-    myArr.push(false);
-  }
+
+  const initialiseBooleanArr = () => {
+    const myArr = [];
+    for (let i = 0; i < currQuestion.answerOptions.length; i++) {
+      myArr.push(false);
+    }
+    return myArr;
+  };
+
   // Set a state for check status array and its updater method
-  const [arrCheckedStatus, updateArrCheckStatus] = useState(myArr);
+  const [arrCheckedStatus, updateArrCheckStatus] = useState(
+    initialiseBooleanArr
+  );
 
   function handleCheckboxes(answerText, price) {
     const currAnswers = Object.values(selectedCheckboxes);
@@ -217,12 +224,18 @@ const MCQ = (props) => {
       (answerOptions) => answerOptions.answerText
     );
     const index = availableOptions.indexOf(answerText);
+
     // Updating the boolean value of check status of the equivalent checkbox state.
     arrCheckedStatus[index] = !arrCheckedStatus[index];
-    // if current answers do not include the latest clicked option,
+    // if (arrCheckedStatus[index]) {
+    //   console.log("checkbox is checked");
+    // } else if (!arrCheckedStatus[index]) {
+    //   console.log("checkbox is UNCHECKED");
+    // }
+    // If the checkbox status is checked, and if the selected answer does not exist in selectedCheckboxes,
     // We simply add it as a new object into selectedCheckboxes
-    if (!currAnswers.includes(answerText)) {
-      if (arrCheckedStatus[index]) {
+    if (arrCheckedStatus[index]) {
+      if (!currAnswers.includes(answerText)) {
         updateSelectedCheckboxes([
           ...selectedCheckboxes,
           {
@@ -231,18 +244,54 @@ const MCQ = (props) => {
           },
         ]);
       }
-      // console.log("updated array: " + selectedCheckboxes);
-    } else if (arrCheckedStatus[index]) {
-      // If an option is clicked BUT the checkbox is being UNCHECKED,
+    } else if (!arrCheckedStatus[index]) {
+      // If an option is being UNCHECKED,
       // We need to remove the equivalent object from selectedCheckboxes
-      console.log("we're getting rid of the unchecked obj");
+
+      console.log("checkbox is UNCHECKED");
+      console.log("before: " + JSON.stringify(selectedCheckboxes));
 
       const newCheckboxes = selectedCheckboxes;
       for (let i = 0; i < selectedCheckboxes.length; i++) {
         if (selectedCheckboxes[i].selectedAnswer === answerText) {
-          var deleted = newCheckboxes.pop(i);
+          newCheckboxes.splice(i, 1);
           updateSelectedCheckboxes(newCheckboxes);
-          console.log("deleted item after unchecking: " + deleted);
+          console.log("now: " + JSON.stringify(selectedCheckboxes));
+          break;
+        }
+      }
+    }
+  }
+
+  // handleCustomCheckbox is roughly a replicate of handleCheckboxes
+  // The only exception is that it handles specifications
+  function handleCustomCheckbox(answerText, specifications) {
+    const currAnswers = Object.values(selectedCheckboxes);
+    const availableOptions = currQuestion.answerOptions.map(
+      (answerOptions) => answerOptions.answerText
+    );
+    const index = availableOptions.indexOf(answerText);
+    arrCheckedStatus[index] = !arrCheckedStatus[index];
+    if (arrCheckedStatus[index]) {
+      if (!currAnswers.includes(answerText)) {
+        updateSelectedCheckboxes([
+          ...selectedCheckboxes,
+          {
+            selectedAnswer: answerText,
+            specifications: specifications,
+            price: 0,
+          },
+        ]);
+      }
+    } else if (!arrCheckedStatus[index]) {
+      console.log("checkbox is UNCHECKED");
+      console.log("before: " + JSON.stringify(selectedCheckboxes));
+      const newCheckboxes = selectedCheckboxes;
+      for (let i = 0; i < selectedCheckboxes.length; i++) {
+        if (selectedCheckboxes[i].selectedAnswer === answerText) {
+          newCheckboxes.splice(i, 1);
+          updateSelectedCheckboxes(newCheckboxes);
+          console.log("now: " + JSON.stringify(selectedCheckboxes));
           break;
         }
       }
@@ -277,11 +326,12 @@ const MCQ = (props) => {
             control={<Checkbox />}
             label={answerText}
             price={price}
+            onClick={() => handleCustomCheckbox(answerText, specifications)}
             label={
               <TextField
                 required
                 label="Please Specify"
-                // onchange={(e) => updateSpecifications(e.target.value)}
+                onchange={(e) => updateSpecifications(e.target.value)}
               />
             }
           />
