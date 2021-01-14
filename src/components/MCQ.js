@@ -30,7 +30,7 @@ const MCQ = (props) => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(5);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -154,6 +154,7 @@ const MCQ = (props) => {
         }
       }
     } else if (currQuestion.selectionType == "multi-select") {
+      console.log("now it's multi-select");
       // We need to access the last object of the selectedCheckboxes array to proceed
       // This is because whenever a checkbox is checked, the data (obj) is added to the end of the array of objects
       // We only want to capture the latest piece of obj to access its attributes.
@@ -176,16 +177,37 @@ const MCQ = (props) => {
       }
       // If no custom option is selected, we don't need to add specs text in the object
       else {
-        const newResponse = [...selectedCheckboxes];
-        const newAnswer = {
-          questionNumber: currQuestion.questionNumber,
-          questionTopic: questionObj.questionTopic,
-          selectionType: questionObj.selectionType,
-          selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
-          estimatedCost: latestAddedCheckbox.price,
-        };
-        newList.push(newAnswer);
-        updateSelectedCheckboxes(newList);
+        console.log("No custom option!");
+        for (let i = 0; i < responses.length; i++) {
+          // If we're dealing with the same question, but checkboxes is updated
+          // We update the checkbox of the question
+          if (
+            selectedRadioButton.questionNumber ===
+              responses[i].questionNumber &&
+            selectedRadioButton.selectedAnswers !== responses[i].selectedAnswers
+          ) {
+            console.log("same qs, diff ans");
+
+            newList[i].selectedAnswers = selectedCheckboxes;
+            updateResponses(newList);
+            break;
+          }
+          // If we're dealing with a different qs and no ans has been selected
+          else if (
+            !answeredQuestions.includes(selectedRadioButton.questionNumber)
+          ) {
+            console.log("diff qs, add new item");
+            const newAnswer = {
+              questionNumber: currQuestion.questionNumber,
+              questionTopic: questionObj.questionTopic,
+              selectionType: questionObj.selectionType,
+              selectedAnswer: selectedCheckboxes,
+            };
+            newList.push(newAnswer);
+            updateResponses(newList);
+            break;
+          }
+        }
       }
     }
   }
