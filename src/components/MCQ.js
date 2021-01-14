@@ -30,7 +30,7 @@ const MCQ = (props) => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(5);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -63,7 +63,27 @@ const MCQ = (props) => {
 
   const questionNumber = questionIndex + 1;
 
+  async function calculateTotalPrice() {
+    console.log("calculateTotalPrice");
+    let newTotal = 0;
+    responses.forEach((question) => {
+      if (question.selectionType === "single-select") {
+        console.log("question.estimatedCost: " + question.estimatedCost);
+        newTotal += question.estimatedCost;
+        setTotalPrice(newTotal);
+      } else {
+        question.selectedAnswers.forEach((checkbox) => {
+          newTotal += checkbox.estimatedCost;
+          setTotalPrice(newTotal);
+        });
+      }
+    });
+  }
+
   async function handleUpdateResponses(questionObj) {
+    if (currQuestion.selectionType == "multi-select") {
+      console.log("now it's multi-select");
+    }
     // Keep the original array using spread operator
     const newList = [...responses];
 
@@ -178,6 +198,7 @@ const MCQ = (props) => {
       // If no custom option is selected, we don't need to add specs text in the object
       else {
         console.log("No custom option!");
+
         for (let i = 0; i < responses.length; i++) {
           // If we're dealing with the same question, but checkboxes is updated
           // We update the checkbox of the question
@@ -210,6 +231,7 @@ const MCQ = (props) => {
         }
       }
     }
+    calculateTotalPrice();
   }
 
   function handleCustomRadioButton(answerText, price) {
@@ -282,7 +304,6 @@ const MCQ = (props) => {
   // We initialise an array of 'false' for myArr
   // It depends on the length of the options for each question.
   // I.e, if there're 8 options, there'll be 8 'false' created in myArr
-
   const initialiseBooleanArr = () => {
     const myArr = [];
     for (let i = 0; i < currQuestion.answerOptions.length; i++) {
@@ -305,11 +326,7 @@ const MCQ = (props) => {
 
     // Updating the boolean value of check status of the equivalent checkbox state.
     arrCheckedStatus[index] = !arrCheckedStatus[index];
-    // if (arrCheckedStatus[index]) {
-    //   console.log("checkbox is checked");
-    // } else if (!arrCheckedStatus[index]) {
-    //   console.log("checkbox is UNCHECKED");
-    // }
+
     // If the checkbox status is checked, and if the selected answer does not exist in selectedCheckboxes,
     // We simply add it as a new object into selectedCheckboxes
     if (arrCheckedStatus[index]) {
@@ -318,7 +335,7 @@ const MCQ = (props) => {
           ...selectedCheckboxes,
           {
             selectedAnswer: answerText,
-            price: price,
+            estimatedCost: price,
           },
         ]);
       }
@@ -357,7 +374,7 @@ const MCQ = (props) => {
           {
             selectedAnswer: answerText,
             specifications: specifications,
-            price: 0,
+            estimatedCost: 0,
           },
         ]);
       }
@@ -448,6 +465,7 @@ const MCQ = (props) => {
 
     setCheckStatus(false);
     updateSpecifications("");
+    setTotalPrice(0);
   };
 
   return (
@@ -543,6 +561,9 @@ const MCQ = (props) => {
 
           <Card open fullWidth maxwidth="sm" boxshadow={3}>
             <CardContent>
+              <p>
+                <strong>Total Price:</strong> ${JSON.stringify(totalPrice)}
+              </p>
               <p>
                 <strong>Checked status:</strong>{" "}
                 {JSON.stringify(arrCheckedStatus)}
