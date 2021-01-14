@@ -63,15 +63,7 @@ const MCQ = (props) => {
 
   const questionNumber = questionIndex + 1;
 
-  const answeredQuestions = () => {
-    let questioNumsArr = [];
-    for (let i = 0; i < responses.length; i++) {
-      questioNumsArr.push(responses[i].questionNumber);
-    }
-    return questioNumsArr;
-  };
-
-  function handleUpdateResponses(questionObj) {
+  async function handleUpdateResponses(questionObj) {
     // Keep the original array using spread operator
     const newList = [...responses];
 
@@ -81,8 +73,8 @@ const MCQ = (props) => {
     // First, we deal with single-select questions
     if (currQuestion.selectionType === "single-select") {
       // If the user selected a custom option, we need to have specification input passed into the object
-      if (selectedRadioButton.selectedAnswer != "Custom") {
-        console.log("Yes, custom option");
+      if (selectedRadioButton.selectedAnswer == "Custom") {
+        // console.log("Yes, custom option");
         const newAnswer = {
           questionNumber: currQuestion.questionNumber,
           questionTopic: questionObj.questionTopic,
@@ -94,27 +86,70 @@ const MCQ = (props) => {
         updateResponses(newList);
       }
       // If no custom option is selected, we don't need to add specs text in the object
-      else if (selectedRadioButton.selectedAnswer == "Custom") {
-        console.log("No custom option, res length is " + responses.length);
-        // If radiobutton selected is for the same question
-        // And if the latest selected answer is different to the one existed for that same qs, update it in-place.
-        for (let i = 0; i < responses.length; i++) {
-          if (
-            selectedRadioButton.questionNumber === responses[i].questionNumber
-          ) {
-            const newAnswer = {
+      else if (selectedRadioButton.selectedAnswer != "Custom") {
+        // console.log("No custom option");
+
+        // If the latest selected answer is different to the one existed for that same qs, we update it in-place.
+        // If the question is different, and we haven't select an answer yet, we add new item into allResponses
+
+        // If we haven't select anything, just add the response to it!
+        if (responses.length === 0) {
+          // console.log("adding item into empty arr");
+          updateResponses([
+            {
               questionNumber: currQuestion.questionNumber,
               questionTopic: questionObj.questionTopic,
               selectionType: questionObj.selectionType,
               selectedAnswer: selectedRadioButton.selectedAnswer,
               estimatedCost: selectedRadioButton.price,
-              specifications: specifications,
-            };
-            const newResponse = responses[i];
-            newResponse[i] = newAnswer;
-            newList.push(newAnswer);
-            updateResponses(newList);
-            break;
+            },
+          ]);
+        } else {
+          // console.log("arr is not empty");
+
+          // Collect question numbers that are being answered already
+          var answeredQuestions = [];
+          for (let i = 0; i < responses.length; i++) {
+            answeredQuestions.push(responses[i].questionNumber);
+          }
+          // If we our allResponses is NOT empty, we want to check a few things...
+          for (let i = 0; i < responses.length; i++) {
+            // If we're dealing with the same question, but a different answer is selected
+            // We replace the answer for that question with the latest selected option details
+            if (
+              selectedRadioButton.questionNumber ===
+                responses[i].questionNumber &&
+              selectedRadioButton.selectedAnswer !== responses[i].selectedAnswer
+            ) {
+              // console.log("same qs, diff ans");
+              const newAnswer = {
+                questionNumber: currQuestion.questionNumber,
+                questionTopic: questionObj.questionTopic,
+                selectionType: questionObj.selectionType,
+                selectedAnswer: selectedRadioButton.selectedAnswer,
+                estimatedCost: selectedRadioButton.price,
+              };
+
+              newList[i] = newAnswer;
+              updateResponses(newList);
+              break;
+            }
+            // If we're dealing with a different qs and no ans has been selected
+            else if (
+              !answeredQuestions.includes(selectedRadioButton.questionNumber)
+            ) {
+              // console.log("diff qs, add new item");
+              const newAnswer = {
+                questionNumber: currQuestion.questionNumber,
+                questionTopic: questionObj.questionTopic,
+                selectionType: questionObj.selectionType,
+                selectedAnswer: selectedRadioButton.selectedAnswer,
+                estimatedCost: selectedRadioButton.price,
+              };
+              newList.push(newAnswer);
+              updateResponses(newList);
+              break;
+            }
           }
         }
       }
@@ -430,6 +465,13 @@ const MCQ = (props) => {
                 : multiSelectQuestions}
             </RadioGroup>
           </FormControl>
+
+          <FormControl open fullWidth maxwidth="md">
+            <p>
+              <strong>All Responses: </strong>
+              {JSON.stringify(responses)}
+            </p>
+          </FormControl>
           <br></br>
 
           <Button color="secondary" variant="contained" onClick={prevQuestion}>
@@ -496,16 +538,10 @@ const MCQ = (props) => {
                   ? JSON.stringify(selectedRadioButton)
                   : JSON.stringify(selectedCheckboxes)}
               </p>
-              <p>
-                <strong>Specs:</strong> {specifications}
-              </p>
+
               <p>
                 <strong>Current question type: </strong>
                 {currQuestion.selectionType}
-              </p>
-              <p>
-                <strong>All Responses: </strong>
-                {JSON.stringify(responses)}
               </p>
             </CardContent>
           </Card>
