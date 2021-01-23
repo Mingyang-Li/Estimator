@@ -3,7 +3,7 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
-import FormLabel from "@material-ui/core/FormLabel";
+import FormGroup from "@material-ui/core/FormGroup";
 import Checkbox from "@material-ui/core/Checkbox";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -12,16 +12,12 @@ import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import theme from "../theme";
 import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
 import { quizData } from "./quizData";
-
 import DeleteIcon from "@material-ui/icons/Delete";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
-import { ContactSupport } from "@material-ui/icons";
 
 const MCQ = (props) => {
   const [value, setValue] = React.useState();
@@ -30,7 +26,7 @@ const MCQ = (props) => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(4);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -80,6 +76,14 @@ const MCQ = (props) => {
     setTotalPrice(newTotal);
   }
 
+  function getAnsweredQuestions() {
+    var newArr = [];
+    for (let i = 0; i < responses.length; i++) {
+      newArr.push(responses[i].questionNumber);
+    }
+    return newArr;
+  }
+
   async function updateAllResponsesSingleSelect(questionObj) {
     console.log("update responses with single-select");
 
@@ -97,14 +101,14 @@ const MCQ = (props) => {
       newList.push(newAnswer);
       updateResponses(newList);
     } else if (selectedRadioButton.selectedAnswer !== "Custom") {
-      console.log("No custom option");
+      // console.log("No custom option");
       // If no custom option is selected, we don't need to add specs text in the object
       // If the latest selected answer is different to the one existed for that same qs, we update it in-place.
       // If the question is different, and we haven't select an answer yet, we add new item into allResponses
 
       // If we haven't select anything, just add the response to it!
       if (responses.length === 0) {
-        console.log("adding item into empty arr");
+        //console.log("adding item into empty arr");
         updateResponses([
           {
             questionNumber: currQuestion.questionNumber,
@@ -115,15 +119,15 @@ const MCQ = (props) => {
           },
         ]);
       } else {
-        console.log("arr is not empty");
-        // Collect question numbers that are being answered already
-        var answeredQuestions = [];
-        for (let i = 0; i < responses.length; i++) {
-          answeredQuestions.push(responses[i].questionNumber);
-        }
+        // console.log("arr is not empty");
+        const answeredQuestions = getAnsweredQuestions().sort();
+        // console.log(answeredQuestions);
         // If we our allResponses is NOT empty, we want to check a few things...
 
-        if (!answeredQuestions.includes(selectedRadioButton.questionNumber)) {
+        if (
+          answeredQuestions.includes(selectedRadioButton.questionNumber) ===
+          false
+        ) {
           // If we're dealing with a new single-select qs (no ans has been selected)
           console.log("diff qs, add new item");
 
@@ -161,69 +165,46 @@ const MCQ = (props) => {
         }
       }
     }
-    console.dirxml(responses);
+    console.table(responses);
   }
 
   async function updateAllResponsesMultiSelect(questionObj) {
+    // console.table(selectedCheckboxes);
     console.log("update responses with multi-select");
-    var answeredQuestions = [];
-    for (let i = 0; i < responses.length; i++) {
-      answeredQuestions.push(responses[i].questionNumber);
-    }
-    // We need to access the last object of the selectedCheckboxes array to proceed
-    // This is because whenever a checkbox is checked, the data (obj) is added to the end of the array of objects
-    // We only want to capture the latest piece of obj to access its attributes.
-    const latestAddedCheckbox =
-      selectedCheckboxes[selectedCheckboxes.length - 1];
-    // Keep the original array using spread operator
+    const answeredQuestions = getAnsweredQuestions().sort();
     const newList = [...responses];
 
-    // Again, we check if specifications are made
-    // Same logic as handling responses for singleSelect questions
-    if (currQuestion.selectedAnswer === "Custom") {
+    // If we're dealing with a new qs and no ans has been selected at all
+    if (answeredQuestions.includes(currQuestion.questionNumber) === false) {
+      console.log("new multi-select, add new item");
       const newAnswer = {
         questionNumber: currQuestion.questionNumber,
         questionTopic: questionObj.questionTopic,
         selectionType: questionObj.selectionType,
-        selectedAnswer: latestAddedCheckbox.selectedCheckboxes,
-        specifications: specifications,
-        estimatedCost: latestAddedCheckbox.price,
+        selectedAnswers: selectedCheckboxes,
       };
-      // newList.push(newAnswer);
-      updateSelectedCheckboxes(newList);
-    }
-    // If no custom option is selected, we don't need to add specs text in the object
-    else {
-      console.log("No custom option!");
-
-      // If we're dealing with the same question, but checkboxes is updated
-      // We update the checkbox of the question
-      if (
-        selectedRadioButton.questionNumber === currQuestion.questionNumber &&
-        selectedRadioButton.selectedAnswers !== currQuestion.selectedAnswers
-      ) {
-        console.log("same qs, diff ans");
-
-        // newList[i].selectedAnswers = selectedCheckboxes;
-        updateResponses(newList);
-      }
-      // If we're dealing with a different qs and no ans has been selected
-      else if (
-        !answeredQuestions.includes(selectedRadioButton.questionNumber)
-      ) {
-        console.log("diff qs, add new item");
-        const newAnswer = {
-          questionNumber: currQuestion.questionNumber,
-          questionTopic: questionObj.questionTopic,
-          selectionType: questionObj.selectionType,
-          selectedAnswer: selectedCheckboxes,
-        };
-        newList.push(newAnswer);
-        updateResponses(newList);
+      newList.push(newAnswer);
+      updateResponses(newList);
+    } else {
+      // if there are any changes in selectedChecboxes at all (every click)
+      console.log("Not new qs, update selectedCheckboxes!");
+      for (let i = 0; i < responses; i++) {
+        if (responses[i].questionNumber === currQuestion.questionNumber) {
+          console.log(
+            "need to update qs number at " + newList[i].questionNumber
+          );
+          newList[i].selectedAnswers = selectedCheckboxes;
+          updateResponses(newList);
+          break;
+        }
       }
     }
+    console.table(responses);
   }
 
+  // This function gets fired whenever an option in RadioGroup is clicked
+  // It combines updateAllResponsesSingleSelect and updateAllResponsesMultiSelect
+  // Original version of this function is shortened due to maintainability
   async function handleUpdateResponses(questionObj) {
     if (currQuestion.selectionType === "single-select") {
       setCheckStatus(!checkStatus);
@@ -343,15 +324,14 @@ const MCQ = (props) => {
       // If an option is being UNCHECKED,
       // We need to remove the equivalent object from selectedCheckboxes
 
-      console.log("checkbox is UNCHECKED");
-      console.log("before: " + JSON.stringify(selectedCheckboxes));
-
+      // console.log("checkbox is UNCHECKED");
+      // console.log("before: " + JSON.stringify(selectedCheckboxes));
       const newCheckboxes = selectedCheckboxes;
       for (let i = 0; i < selectedCheckboxes.length; i++) {
         if (selectedCheckboxes[i].selectedAnswer === answerText) {
           newCheckboxes.splice(i, 1);
           updateSelectedCheckboxes(newCheckboxes);
-          console.log("now: " + JSON.stringify(selectedCheckboxes));
+          // console.log("now: " + JSON.stringify(selectedCheckboxes));
           break;
         }
       }
@@ -402,6 +382,7 @@ const MCQ = (props) => {
       answerText !== "Custom" ? (
         <FormControlLabel
           index={dynamicIndex++}
+          // onChange={() => handleUpdateResponses(currQuestion)}
           control={
             <Checkbox
               checked={arrCheckedStatus[dynamicIndex++]}
@@ -472,7 +453,6 @@ const MCQ = (props) => {
     <MuiThemeProvider theme={theme}>
       <>
         <OwnAppBar title />
-
         <Dialog open fullWidth maxwidth="md">
           <FormControl component="fieldset">
             <Grid container spacing={3}>
@@ -496,14 +476,18 @@ const MCQ = (props) => {
             </Grid>
             <h3 component="legend">{currQuestion.questionText}</h3>
 
-            <RadioGroup
-              value={value}
-              onChange={() => handleUpdateResponses(currQuestion)}
-            >
-              {currQuestion.selectionType === "single-select"
-                ? singleSelectQuestions
-                : multiSelectQuestions}
-            </RadioGroup>
+            {currQuestion.selectionType === "single-select" ? (
+              <RadioGroup
+                value={value}
+                onChange={() => handleUpdateResponses(currQuestion)}
+              >
+                {singleSelectQuestions}
+              </RadioGroup>
+            ) : (
+              <FormGroup onChange={() => handleUpdateResponses(currQuestion)}>
+                {multiSelectQuestions}
+              </FormGroup>
+            )}
           </FormControl>
 
           <FormControl open fullWidth maxwidth="md">
