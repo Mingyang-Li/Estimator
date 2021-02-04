@@ -19,14 +19,14 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 
-const MCQ = (props) => {
+const MCQ = () => {
   const [value, setValue] = React.useState();
   const changedOption = (event) => {
     setValue(event.target.value);
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(4);
+  const [questionIndex, setQuestionIndex] = useState(1);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -77,11 +77,12 @@ const MCQ = (props) => {
   }
 
   function getAnsweredQuestions() {
-    var newArr = [];
-    for (let i = 0; i < responses.length; i++) {
-      newArr.push(responses[i].questionNumber);
-    }
-    return newArr;
+    const arr = [];
+    responses.map((res) => {
+      arr.push(res.questionNumber);
+    });
+    arr.sort();
+    return arr;
   }
 
   async function updateAllResponsesSingleSelect(questionObj) {
@@ -108,7 +109,7 @@ const MCQ = (props) => {
 
       // If we haven't select anything, just add the response to it!
       if (responses.length === 0) {
-        //console.log("adding item into empty arr");
+        console.log("adding item into empty arr");
         updateResponses([
           {
             questionNumber: currQuestion.questionNumber,
@@ -119,11 +120,12 @@ const MCQ = (props) => {
           },
         ]);
       } else {
-        // console.log("arr is not empty");
-        const answeredQuestions = getAnsweredQuestions().sort();
-        // console.log(answeredQuestions);
-        // If we our allResponses is NOT empty, we want to check a few things...
-
+        console.log("arr is not empty");
+        const answeredQuestions = getAnsweredQuestions();
+        console.log("answered qs numbers: " + answeredQuestions);
+        console.log("curr qs: " + selectedRadioButton.questionNumber);
+        // If we our allResponses is NOT empty,
+        // If the number of current qs DOES NOT exists in the array of qs numbers of answered qs, we add new response
         if (
           answeredQuestions.includes(selectedRadioButton.questionNumber) ===
           false
@@ -154,7 +156,6 @@ const MCQ = (props) => {
             selectedAnswer: selectedRadioButton.selectedAnswer,
             estimatedCost: selectedRadioButton.price,
           };
-
           for (let i = 0; i < answeredQuestions.length; i++) {
             if (answeredQuestions[i] === selectedRadioButton.questionNumber) {
               newList[i] = newAnswer;
@@ -165,7 +166,7 @@ const MCQ = (props) => {
         }
       }
     }
-    console.table(responses);
+    // console.table(responses);
   }
 
   async function updateAllResponsesMultiSelect(questionObj) {
@@ -200,6 +201,24 @@ const MCQ = (props) => {
       }
     }
     console.table(responses);
+  }
+
+  async function sortResponses() {
+    // sort response to qs in numerical order by question number
+    const sortedResponses = [];
+    const qsNum = [];
+    responses.forEach((res) => {
+      qsNum.push(res.questionNumber);
+    });
+    qsNum.sort();
+    qsNum.forEach((num) => {
+      responses.forEach((res) => {
+        if (res.questionNumber === num) {
+          sortedResponses.push(res);
+        }
+      });
+    });
+    updateResponses(sortedResponses);
   }
 
   // This function gets fired whenever an option in RadioGroup is clicked
