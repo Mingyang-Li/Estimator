@@ -26,7 +26,7 @@ const MCQ = () => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(4);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
