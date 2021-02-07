@@ -26,7 +26,7 @@ const MCQ = () => {
   };
 
   // initial value of question indes = 0 because we'll start displaying questions from the beginning of the array of question objects (quizData)
-  const [questionIndex, setQuestionIndex] = useState(1);
+  const [questionIndex, setQuestionIndex] = useState(4);
 
   // currQuestion is a question object, it gets updated every time questionIndex changes, which changes the questions
   const currQuestion = quizData[questionIndex];
@@ -59,7 +59,7 @@ const MCQ = () => {
 
   const questionNumber = questionIndex + 1;
 
-  async function calculateTotalPrice() {
+  const calculateTotalPrice = () => {
     //console.log("calculateTotalPrice is fired");
     let newTotal = 0;
     responses.forEach((question) => {
@@ -74,16 +74,16 @@ const MCQ = () => {
       }
     });
     setTotalPrice(newTotal);
-  }
+  };
 
-  function getAnsweredQuestions() {
+  const getAnsweredQuestions = () => {
     const arr = [];
     responses.map((res) => {
       arr.push(res.questionNumber);
     });
     arr.sort();
     return arr;
-  }
+  };
 
   async function updateAllResponsesSingleSelect(questionObj) {
     console.log("update responses with single-select");
@@ -107,7 +107,7 @@ const MCQ = () => {
       // If the latest selected answer is different to the one existed for that same qs, we update it in-place.
       // If the question is different, and we haven't select an answer yet, we add new item into allResponses
 
-      // If we haven't select anything, just add the response to it!
+      // If we haven't selected anything, just add the response to it!
       if (responses.length === 0) {
         console.log("adding item into empty arr");
         updateResponses([
@@ -120,10 +120,11 @@ const MCQ = () => {
           },
         ]);
       } else {
-        console.log("arr is not empty");
         const answeredQuestions = getAnsweredQuestions();
-        console.log("answered qs numbers: " + answeredQuestions);
-        console.log("curr qs: " + selectedRadioButton.questionNumber);
+        console.log(
+          "arr is not empty, answered qs numbers: " + answeredQuestions
+        );
+        // console.log("curr qs: " + selectedRadioButton.questionNumber);
         // If we our allResponses is NOT empty,
         // If the number of current qs DOES NOT exists in the array of qs numbers of answered qs, we add new response
         if (
@@ -185,7 +186,6 @@ const MCQ = () => {
         selectedAnswers: selectedCheckboxes,
       };
       newList.push(newAnswer);
-      updateResponses(newList);
     } else {
       // if there are any changes in selectedChecboxes at all (every click)
       console.log("Not new qs, update selectedCheckboxes!");
@@ -195,22 +195,20 @@ const MCQ = () => {
             "need to update qs number at " + newList[i].questionNumber
           );
           newList[i].selectedAnswers = selectedCheckboxes;
-          updateResponses(newList);
           break;
         }
       }
     }
-    console.table(responses);
+    console.table(newList.selectedAnswers);
   }
 
-  async function sortResponses() {
-    // sort response to qs in numerical order by question number
+  const sortResponses = () => {
+    // sort response to qs in numerical order by question number and updating the state
     const sortedResponses = [];
-    const qsNum = [];
+    const qsNum = getAnsweredQuestions();
     responses.forEach((res) => {
       qsNum.push(res.questionNumber);
     });
-    qsNum.sort();
     qsNum.forEach((num) => {
       responses.forEach((res) => {
         if (res.questionNumber === num) {
@@ -219,7 +217,7 @@ const MCQ = () => {
       });
     });
     updateResponses(sortedResponses);
-  }
+  };
 
   // This function gets fired whenever an option in RadioGroup is clicked
   // It combines updateAllResponsesSingleSelect and updateAllResponsesMultiSelect
