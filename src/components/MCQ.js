@@ -507,14 +507,6 @@ const MCQ = () => {
             )}
           </FormControl>
 
-          <FormControl open fullWidth maxwidth="md">
-            <p>
-              <strong>All Responses: </strong>
-              {JSON.stringify(responses)}
-            </p>
-          </FormControl>
-          <br></br>
-
           <Button color="secondary" variant="contained" onClick={prevQuestion}>
             Previous
           </Button>
