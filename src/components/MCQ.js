@@ -559,36 +559,6 @@ const MCQ = () => {
           </Grid>
 
           <br></br>
-
-          <Card open fullWidth maxwidth="sm" boxshadow={3}>
-            <CardContent>
-              <p>
-                <strong>Total Price:</strong> ${JSON.stringify(totalPrice)}
-              </p>
-              <p>
-                <strong>Checked status:</strong>{" "}
-                {JSON.stringify(arrCheckedStatus)}
-              </p>
-              <p>
-                <strong>
-                  Current{" "}
-                  {currQuestion.selectionType === "single-select"
-                    ? "radio button"
-                    : "checkboxes "}
-                  :{" "}
-                </strong>
-
-                {currQuestion.selectionType === "single-select"
-                  ? JSON.stringify(selectedRadioButton)
-                  : JSON.stringify(selectedCheckboxes)}
-              </p>
-
-              <p>
-                <strong>Current question type: </strong>
-                {currQuestion.selectionType}
-              </p>
-            </CardContent>
-          </Card>
         </Dialog>
       </>
     </MuiThemeProvider>
